@@ -61,5 +61,4 @@ Daemon meldet Fehler wenn:
 
 Daemon hat 2 loops:
 - Einmal am Tag über liste von urls fuer certs
-- Einmal pro Stunde über alle clients:
--- Heartbeat ok
+- Einmal pro Stunde über alle clients: Heartbeat ok
