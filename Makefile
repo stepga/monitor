@@ -1,12 +1,9 @@
-.PHONY: all mkdirs
+.PHONY: all
 
-all: daemon
+all: daemon node
 
-mkdirs:
-	@mkdir -p bin
+daemon:
+	go build -o bin/daemon ./cmd/daemon/
 
-daemon: mkdirs
-	go build -o bin/daemon cmd/daemon/main.go
-
-node: mkdirs
-	go build -o bin/node cmd/node/main.go
+node:
+	go build -o bin/node ./cmd/node/
