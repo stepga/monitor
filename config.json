@@ -1,0 +1,15 @@
+{
+    "cert": {
+        "minimum_days_left": 5,
+        "urls": [
+            "https://google.com",
+            "https://example.com",
+            "https://duckduckgo.com",
+            "https://microsoft.com",
+            "https://google.de",
+            "https://expired.badssl.com",
+            "https://reddit.com",
+            "https://youtube.com"
+        ]
+    }
+}
