@@ -1,4 +1,7 @@
 {
+    "listener": {
+        "address": "127.0.0.1:5566"
+    },
     "cert": {
         "minimum_days_left": 5,
         "urls": [

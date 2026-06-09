@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -8,7 +9,12 @@ import (
 	"time"
 
 	"github.com/stepga/monitor/cert"
+	"github.com/stepga/monitor/listener"
 )
+
+type ListenerConfig struct {
+	Address string `json:"address"`
+}
 
 type CertConfig struct {
 	MinimumDaysLeft int      `json:"minimum_days_left"`
@@ -16,7 +22,8 @@ type CertConfig struct {
 }
 
 type Config struct {
-	Cert CertConfig `json:"cert"`
+	Cert     CertConfig     `json:"cert"`
+	Listener ListenerConfig `json:"listener"`
 }
 
 func LoadConfig(path string) (*Config, error) {
@@ -71,4 +78,16 @@ func main() {
 
 	info := cert.CheckCerts(cfg.Cert.Urls)
 	printCertInfo(info, cfg.Cert.MinimumDaysLeft)
+
+	l, err := listener.Start(cfg.Listener.Address)
+	if err != nil {
+		panic(err)
+	}
+	defer l.Close()
+	fmt.Printf("Listening on %s\n", l.Addr())
+
+	// TODO: Use Ctrl-C/Signals or something
+	fmt.Printf("Press enter to quit")
+	input := bufio.NewScanner(os.Stdin)
+	input.Scan()
 }
