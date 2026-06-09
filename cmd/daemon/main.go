@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"os"
 	"time"
-	"fmt"
+
+	"github.com/stepga/monitor/cert"
 )
 
 type CertConfig struct {
@@ -32,8 +34,8 @@ func LoadConfig(path string) (*Config, error) {
 	return &cfg, nil
 }
 
-func printCertInfo(info []CertInfo, minimumDaysLeft int) {
-	threshold := time.Duration(minimumDaysLeft * 24) * time.Hour
+func printCertInfo(info []cert.CertInfo, minimumDaysLeft int) {
+	threshold := time.Duration(minimumDaysLeft*24) * time.Hour
 	for _, info := range info {
 		fmt.Printf("%s (%dms): ", info.Url, info.Took.Milliseconds())
 		if info.Error != nil {
@@ -67,6 +69,6 @@ func main() {
 		panic(err)
 	}
 
-	info := check_certs(cfg.Cert.Urls)
+	info := cert.CheckCerts(cfg.Cert.Urls)
 	printCertInfo(info, cfg.Cert.MinimumDaysLeft)
 }

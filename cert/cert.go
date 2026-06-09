@@ -1,4 +1,4 @@
-package main
+package cert
 
 import (
 	"crypto/tls"
@@ -52,7 +52,7 @@ func certExpiry(rawURL string) (*time.Time, error) {
 	return &cert.NotAfter, nil
 }
 
-func check_certs(urls []string) []CertInfo {
+func CheckCerts(urls []string) []CertInfo {
 	var wg sync.WaitGroup
 	outChan := make(chan CertInfo)
 
