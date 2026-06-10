@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"slices"
-	"time"
 
 	"github.com/stepga/monitor/collector"
 	"github.com/stepga/monitor/collector/cert"
@@ -20,6 +19,11 @@ import (
 var AvailableCollectors = map[string]collector.Collector{
 	"certs":    &cert.CertsCollector{},
 	"listener": &listener.ListenerCollector{},
+}
+
+var AvailableReporters = map[string]reporter.Reporter{
+	"stdout":  &stdout.StdoutReporter{},
+	"blubber": &reporter.BlubberReporter{},
 }
 
 func LoadConfig(path string) (*config.Config, error) {
@@ -37,32 +41,6 @@ func LoadConfig(path string) (*config.Config, error) {
 	return &cfg, nil
 }
 
-func printCertInfo(info []cert.CertInfo, minimumDaysLeft int) {
-	threshold := time.Duration(minimumDaysLeft*24) * time.Hour
-	for _, info := range info {
-		fmt.Printf("%s (%dms): ", info.Url, info.Took.Milliseconds())
-		if info.Error != nil {
-			fmt.Printf("ERROR: %s\n", info.Error)
-			continue
-		}
-		remaining := time.Until(*info.Expiry)
-
-		if remaining < threshold {
-			fmt.Printf(
-				"EXPIRES SOON %v remaining, expires %s\n",
-				remaining.Round(time.Hour),
-				info.Expiry.Format(time.UnixDate),
-			)
-		} else {
-			fmt.Printf(
-				"OK %v remaining, expires %s\n",
-				remaining.Round(time.Hour),
-				info.Expiry.Format(time.UnixDate),
-			)
-		}
-	}
-}
-
 /*
    Main Reporte implementation
    Starts reporters from config
@@ -70,10 +48,6 @@ func printCertInfo(info []cert.CertInfo, minimumDaysLeft int) {
 
 type rep struct {
 	activeReporters []reporter.Reporter
-}
-
-var AvailableReporters = map[string]reporter.Reporter{
-	"stdout": &stdout.StdoutReporter{},
 }
 
 func (r *rep) Init(cfg *config.Config) {
