@@ -9,21 +9,18 @@ import (
 	"slices"
 
 	"github.com/stepga/monitor/collector"
-	"github.com/stepga/monitor/collector/cert"
-	"github.com/stepga/monitor/collector/listener"
 	"github.com/stepga/monitor/config"
 	"github.com/stepga/monitor/reporter"
 	"github.com/stepga/monitor/reporter/stdout"
 )
 
 var AvailableCollectors = map[string]collector.Collector{
-	"certs":    &cert.CertsCollector{},
-	"listener": &listener.ListenerCollector{},
+	"cert":     &collector.CertCollector{},
+	"listener": &collector.ListenerCollector{},
 }
 
 var AvailableReporters = map[string]reporter.Reporter{
-	"stdout":  &stdout.StdoutReporter{},
-	"blubber": &reporter.BlubberReporter{},
+	"stdout": &stdout.StdoutReporter{},
 }
 
 func LoadConfig(path string) (*config.Config, error) {

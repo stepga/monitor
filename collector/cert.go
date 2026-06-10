@@ -1,4 +1,4 @@
-package cert
+package collector
 
 import (
 	"crypto/tls"
@@ -19,7 +19,7 @@ type CertInfo struct {
 	Took   time.Duration
 }
 
-type CertsCollector struct{}
+type CertCollector struct{}
 
 func certExpiry(rawURL string) (*time.Time, error) {
 	u, err := url.Parse(rawURL)
@@ -87,7 +87,7 @@ func CheckCerts(urls []string) []CertInfo {
 	return results
 }
 
-func (c *CertsCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
+func (c *CertCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
 	go func() {
 		threshold := time.Duration(cfg.Cert.MinimumDaysLeft*24) * time.Hour
 		for {
@@ -128,6 +128,6 @@ func (c *CertsCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
 	}()
 }
 
-func (c *CertsCollector) Info() interface{} {
+func (c *CertCollector) Info() interface{} {
 	return nil
 }
