@@ -1,45 +1,33 @@
 # monitor
 
-h3. architektur
+Basic monitoring system with multiple nodes that connect to a daemon
+that sends reports if something needs attention
 
-- Ein großer daemon und @n@ kleine Nodes (eine Node per Maschine)
-- Wenig bis keine Logik auf den Nodes
-- Nodes verbinden sich zu Daemon
+## Architecture
 
-h3. Non-Goals
+Almost no logic on nodes. They start up, report to the daemon
+(single json object) and terminate
 
-- Content von den Nodes wird nicht verifiziert
-- Nodes authentisieren sich nicht
-- Nodes überwachen keine Prozesse
-- Nodes überwachen keine Memory Auslastung
+## Features
 
-h3. Features
+Dont:
+- verify or authenticate Nodes, anything can report
+- track or monitor memory or cpu usage
+- check for processes or services
 
-- Disk usage
-- apt upgrade status => reboot noetig (z.b. nach kernel update, oder initramfs-update) (@/var/run/reboot-required@)
-- So wenig (am besten garkeine) dependencies wie moeglich
-- Heartbeat
-- Laufzeit Zertifikate: Daemon hat liste an https urls die er täglich checkt
-- Node hat keine Konfiguration
-- Node schickt immer alles an info an den Daemon
-- Logik wie z.B. disks die ignoriert werden ist im Daemon
+Report when:
+- Disk usage is beyond a certain threshold
+- A reboot is required after apt upgrade
+- A node stopped sending messages
+- Certificates nearing end of validity
 
-spaeter:
-- cron job fails
+Try to:
+- Have no external dependencies
+- Nodes without configuration
+- Nodes always report all information
 
-h3. Implementierungs Detail
+## Example node json
 
-Daemon config
-```
-{
- "hosts": [
-   "https://docs.foo.bar",
-   "https://jenkins.org.name"
- ]
-}
-```
-
-Node -> Daemon json, einmal in der Stunde
 ```
 {
   "name": "foo.bar.de",
@@ -52,13 +40,3 @@ Node -> Daemon json, einmal in der Stunde
   "apt_reboot_required": true
 }
 ```
-
-Daemon meldet Fehler wenn:
-
-- Kein Heartbeat (2 missing oder so?)
-- Disk > 80% (oder so)
-- Reboot required nach apt update
-
-Daemon hat 2 loops:
-- Einmal am Tag über liste von urls fuer certs
-- Einmal pro Stunde über alle clients: Heartbeat ok
