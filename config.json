@@ -1,4 +1,6 @@
 {
+    "reporter": ["stdout"],
+    "collectors": ["listener", "certs"],
     "listener": {
         "address": "127.0.0.1:5566"
     },

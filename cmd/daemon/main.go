@@ -6,36 +6,30 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"time"
 
-	"github.com/stepga/monitor/cert"
-	"github.com/stepga/monitor/listener"
-	ni "github.com/stepga/monitor/nodeinfo"
-	"github.com/stepga/monitor/store"
+	"github.com/stepga/monitor/collector"
+	"github.com/stepga/monitor/collector/cert"
+	"github.com/stepga/monitor/collector/listener"
+	"github.com/stepga/monitor/config"
+	"github.com/stepga/monitor/reporter"
+	"github.com/stepga/monitor/reporter/stdout"
 )
 
-type ListenerConfig struct {
-	Address string `json:"address"`
+var AvailableCollectors = map[string]collector.Collector{
+	"certs":    &cert.CertsCollector{},
+	"listener": &listener.ListenerCollector{},
 }
 
-type CertConfig struct {
-	MinimumDaysLeft int      `json:"minimum_days_left"`
-	Urls            []string `json:"urls"`
-}
-
-type Config struct {
-	Cert     CertConfig     `json:"cert"`
-	Listener ListenerConfig `json:"listener"`
-}
-
-func LoadConfig(path string) (*Config, error) {
+func LoadConfig(path string) (*config.Config, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var cfg Config
+	var cfg config.Config
 	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
 		return nil, err
 	}
@@ -69,6 +63,34 @@ func printCertInfo(info []cert.CertInfo, minimumDaysLeft int) {
 	}
 }
 
+/*
+   Main Reporte implementation
+   Starts reporters from config
+*/
+
+type rep struct {
+	activeReporters []reporter.Reporter
+}
+
+var AvailableReporters = map[string]reporter.Reporter{
+	"stdout": &stdout.StdoutReporter{},
+}
+
+func (r *rep) Init(cfg *config.Config) {
+	for name, reporter := range AvailableReporters {
+		if slices.Contains(cfg.Reporter, name) {
+			r.activeReporters = append(r.activeReporters, reporter)
+			reporter.Init(cfg)
+		}
+	}
+}
+
+func (r *rep) Report(msg string) {
+	for _, reporter := range r.activeReporters {
+		reporter.Report(msg)
+	}
+}
+
 func main() {
 	config_file := flag.String("config", "config.json", "Path to config.json file")
 	flag.Parse()
@@ -78,19 +100,14 @@ func main() {
 		panic(err)
 	}
 
-	info := cert.CheckCerts(cfg.Cert.Urls)
-	printCertInfo(info, cfg.Cert.MinimumDaysLeft)
+	reporter := rep{}
+	reporter.Init(cfg)
 
-	// TODO: Give thing a good name
-	storeMsgChannel := make(chan ni.NodeInfo)
-	go store.Start(storeMsgChannel)
-
-	l, err := listener.Start(cfg.Listener.Address, storeMsgChannel)
-	if err != nil {
-		panic(err)
+	for name, collector := range AvailableCollectors {
+		if slices.Contains(cfg.Collectors, name) {
+			collector.Init(cfg, &reporter)
+		}
 	}
-	defer l.Close()
-	fmt.Printf("Listening on %s\n", l.Addr())
 
 	// TODO: Use Ctrl-C/Signals or something
 	fmt.Printf("Press enter to quit\n")

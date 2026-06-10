@@ -7,6 +7,9 @@ import (
 	"net/url"
 	"sync"
 	"time"
+
+	"github.com/stepga/monitor/config"
+	"github.com/stepga/monitor/reporter"
 )
 
 type CertInfo struct {
@@ -15,6 +18,8 @@ type CertInfo struct {
 	Error  error
 	Took   time.Duration
 }
+
+type CertsCollector struct{}
 
 func certExpiry(rawURL string) (*time.Time, error) {
 	u, err := url.Parse(rawURL)
@@ -80,4 +85,49 @@ func CheckCerts(urls []string) []CertInfo {
 		results = append(results, result)
 	}
 	return results
+}
+
+func (c *CertsCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
+	go func() {
+		threshold := time.Duration(cfg.Cert.MinimumDaysLeft*24) * time.Hour
+		for {
+			info := CheckCerts(cfg.Cert.Urls)
+			for _, info := range info {
+				if info.Error != nil {
+					reporter.Report(fmt.Sprintf("%s (%dms): ERROR: %s\n",
+						info.Url,
+						info.Took.Milliseconds(),
+						info.Error,
+					))
+					continue
+				}
+				remaining := time.Until(*info.Expiry)
+				if remaining < threshold {
+					reporter.Report(
+						fmt.Sprintf(
+							"%s (%dms): EXPIRES SOON %v remaining, expires %s\n",
+							info.Url,
+							info.Took.Milliseconds(),
+							remaining,
+							info.Expiry.Format(time.UnixDate),
+						))
+				} else {
+					reporter.Report(
+						fmt.Sprintf(
+							"%s (%dms): OK %v remaining, expires %s\n",
+							info.Url,
+							info.Took.Milliseconds(),
+							remaining,
+							info.Expiry.Format(time.UnixDate),
+						))
+				}
+			}
+
+			time.Sleep(1 * time.Minute)
+		}
+	}()
+}
+
+func (c *CertsCollector) Info() interface{} {
+	return nil
 }
