@@ -108,7 +108,6 @@ func (c *ListenerCollector) Init(cfg *config.Config, reporter reporter.Reporter)
 	if err != nil {
 		panic(err)
 	}
-	defer l.Close()
 	fmt.Printf("Listening on %s\n", l.Addr())
 }
 
