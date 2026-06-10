@@ -5,6 +5,7 @@ package uname
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 // OperatingSystemVersion returns the kernel release version as reported by
@@ -17,5 +18,5 @@ func OperatingSystemVersion() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("OperatingSystemVersion(): %w", err)
 	}
-	return string(data), nil
+	return strings.Trim(string(data), " \n"), nil
 }

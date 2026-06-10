@@ -14,7 +14,7 @@ type FileSystem struct {
 
 type NodeInfo struct {
 	// as reported by `uname -n`
-	Hostname string `json:"hostname"`
+	HostName string `json:"host_name"`
 	// as reported by `uname -s`
 	OperatingSystemName string `json:"operating_system_name"`
 	// as reported by `uname -r`
@@ -35,11 +35,13 @@ func CreateInfo() (*NodeInfo, error) {
 	var err error
 	info := &NodeInfo{}
 
-	info.Hostname, err = uname.Hostname()
+	info.HostName, err = uname.Hostname()
 	if err != nil {
 		return nil, err
 	}
+
 	info.OperatingSystemName = uname.OperatingSystemName()
+
 	info.OperatingSystemVersion, err = uname.OperatingSystemVersion()
 	if err != nil {
 		return nil, err
