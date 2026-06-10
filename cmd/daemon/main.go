@@ -87,7 +87,7 @@ func main() {
 	fmt.Printf("Listening on %s\n", l.Addr())
 
 	// TODO: Use Ctrl-C/Signals or something
-	fmt.Printf("Press enter to quit")
+	fmt.Printf("Press enter to quit\n")
 	input := bufio.NewScanner(os.Stdin)
 	input.Scan()
 }
