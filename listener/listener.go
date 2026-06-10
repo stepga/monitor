@@ -44,33 +44,12 @@ func parseNodeMsg(conn net.Conn, out chan<- NodeMsg) {
 	out <- msg
 }
 
-func Thing(store map[string]NodeInfo, in <-chan NodeMsg) {
-	for msg := range in {
-		info, exists := store[msg.Name]
-		if exists {
-			fmt.Printf("Client ping: %s\n", msg.Name)
-			info.LastSeen = time.Now()
-			store[msg.Name] = info
-		} else {
-			fmt.Printf("New client: %s\n", msg.Name)
-			store[msg.Name] = NodeInfo{
-				Name:     msg.Name,
-				LastSeen: time.Now(),
-			}
-		}
-		fmt.Printf("Store: %v\n", store)
-	}
-}
-
-func Start(address string) (net.Listener, error) {
+func Start(address string, storeMsgChannel chan<- NodeMsg) (net.Listener, error) {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return nil, fmt.Errorf("listener: %s\n", err)
 	}
 
-	// TODO: Give thing a good name
-	thingChannel := make(chan NodeMsg)
-	go Thing(make(map[string]NodeInfo), thingChannel)
 	go func() {
 		for {
 			conn, err := listener.Accept()
@@ -82,7 +61,7 @@ func Start(address string) (net.Listener, error) {
 					continue
 				}
 			}
-			go parseNodeMsg(conn, thingChannel)
+			go parseNodeMsg(conn, storeMsgChannel)
 		}
 	}()
 	return listener, nil

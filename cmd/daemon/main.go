@@ -10,6 +10,7 @@ import (
 
 	"github.com/stepga/monitor/cert"
 	"github.com/stepga/monitor/listener"
+	"github.com/stepga/monitor/store"
 )
 
 type ListenerConfig struct {
@@ -79,7 +80,11 @@ func main() {
 	info := cert.CheckCerts(cfg.Cert.Urls)
 	printCertInfo(info, cfg.Cert.MinimumDaysLeft)
 
-	l, err := listener.Start(cfg.Listener.Address)
+	// TODO: Give thing a good name
+	storeMsgChannel := make(chan listener.NodeMsg)
+	go store.Start(storeMsgChannel)
+
+	l, err := listener.Start(cfg.Listener.Address, storeMsgChannel)
 	if err != nil {
 		panic(err)
 	}
