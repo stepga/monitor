@@ -10,7 +10,7 @@ import (
 func Hostname() (string, error) {
 	hostname, err := os.Hostname()
 	if err != nil {
-		return "", fmt.Errorf("Hostname(): %s", err)
+		return "", fmt.Errorf("Hostname(): %w", err)
 	}
 	return hostname, nil
 }

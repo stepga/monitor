@@ -15,7 +15,7 @@ import (
 func OperatingSystemVersion() (string, error) {
 	version, err := syscall.Sysctl("kern.osrelease")
 	if err != nil {
-		return "", fmt.Errorf("OperatingSystemVersion(): %s", err)
+		return "", fmt.Errorf("OperatingSystemVersion(): %w", err)
 	}
 	return version, nil
 }

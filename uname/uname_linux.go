@@ -15,7 +15,7 @@ import (
 func OperatingSystemVersion() (string, error) {
 	data, err := os.ReadFile("/proc/sys/kernel/osrelease")
 	if err != nil {
-		return "", fmt.Errorf("OperatingSystemVersion(): %s", err)
+		return "", fmt.Errorf("OperatingSystemVersion(): %w", err)
 	}
 	return string(data), nil
 }
