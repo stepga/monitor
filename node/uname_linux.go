@@ -1,6 +1,6 @@
 //go:build linux
 
-package uname
+package node
 
 import (
 	"fmt"

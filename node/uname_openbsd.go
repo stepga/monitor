@@ -1,6 +1,6 @@
 //go:build openbsd
 
-package uname
+package node
 
 import (
 	"fmt"

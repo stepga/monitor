@@ -11,8 +11,7 @@ import (
 	"time"
 
 	"github.com/stepga/monitor/config"
-	"github.com/stepga/monitor/nodeinfo"
-	ni "github.com/stepga/monitor/nodeinfo"
+	"github.com/stepga/monitor/node"
 	"github.com/stepga/monitor/reporter"
 )
 
@@ -20,7 +19,7 @@ const MaxListenerMessageSize = 5 * 1024 * 1024 // 5 MB
 
 type ListenerCollector struct{}
 
-func jsonDecodeNodeInfo(conn net.Conn, out chan<- ni.NodeInfo) {
+func jsonDecodeNodeInfo(conn net.Conn, out chan<- node.NodeInfo) {
 	defer conn.Close()
 
 	limited := io.LimitReader(conn, MaxListenerMessageSize+1)
@@ -38,7 +37,7 @@ func jsonDecodeNodeInfo(conn net.Conn, out chan<- ni.NodeInfo) {
 		return
 	}
 
-	var msg ni.NodeInfo
+	var msg node.NodeInfo
 	if err := json.NewDecoder(bytes.NewReader(data)).Decode(&msg); err != nil {
 		slog.Error("jsonDecodeNodeInfo failed", "error", err)
 		return
@@ -46,7 +45,7 @@ func jsonDecodeNodeInfo(conn net.Conn, out chan<- ni.NodeInfo) {
 	out <- msg
 }
 
-func Start(address string, storeMsgChannel chan<- ni.NodeInfo) (net.Listener, error) {
+func Start(address string, storeMsgChannel chan<- node.NodeInfo) (net.Listener, error) {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return nil, fmt.Errorf("listener: %s\n", err)
@@ -80,7 +79,7 @@ Store owner has to:
 - TODO: go over store every X hour and check for missing nodes
 - TODO: publish notifications
 */
-func StartStore(storeMsgChannel <-chan nodeinfo.NodeInfo, reporter reporter.Reporter) {
+func StartStore(storeMsgChannel <-chan node.NodeInfo, reporter reporter.Reporter) {
 	store := make(map[string]StoreInfo)
 	for msg := range storeMsgChannel {
 		if _, exists := store[msg.HostName]; exists {
@@ -102,7 +101,7 @@ func StartStore(storeMsgChannel <-chan nodeinfo.NodeInfo, reporter reporter.Repo
 }
 
 func (c *ListenerCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
-	storeMsgChannel := make(chan ni.NodeInfo)
+	storeMsgChannel := make(chan node.NodeInfo)
 	go StartStore(storeMsgChannel, reporter)
 
 	l, err := Start(cfg.Listener.Address, storeMsgChannel)

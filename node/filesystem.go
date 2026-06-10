@@ -1,7 +1,7 @@
-// The fs package provides information about the mounted filesystems, basically
+// This package file provides information about the mounted filesystems, basically
 // by parsing the output of `df -P`. `df` is part of the OpenBSD base system and
 // the GNU coreutils, and should be present everywhere.
-package fs
+package node
 
 import (
 	"bufio"

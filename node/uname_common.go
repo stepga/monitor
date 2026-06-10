@@ -1,4 +1,4 @@
-package uname
+package node
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 	"runtime"
 )
 
-// Hostname returns (network node) hostname as reported by `uname -n`.
-func Hostname() (string, error) {
+// HostName returns (network node) hostname as reported by `uname -n`.
+func HostName() (string, error) {
 	hostname, err := os.Hostname()
 	if err != nil {
-		return "", fmt.Errorf("Hostname(): %w", err)
+		return "", fmt.Errorf("HostName(): %w", err)
 	}
 	return hostname, nil
 }

@@ -1,10 +1,7 @@
-package nodeinfo
+package node
 
 import (
 	"encoding/json"
-
-	"github.com/stepga/monitor/fs"
-	"github.com/stepga/monitor/uname"
 )
 
 type NodeInfo struct {
@@ -19,7 +16,7 @@ type NodeInfo struct {
 	RebootRequired bool `json:"reboot_required"`
 	// an array of the mounted filesystems and their respective
 	// used and total sizes in bytes
-	FileSystems []fs.FileSystem `json:"file_systems"`
+	FileSystems []FileSystem `json:"file_systems"`
 }
 
 func (nodeinfo *NodeInfo) Marshal() ([]byte, error) {
@@ -38,19 +35,19 @@ func CreateInfo() (*NodeInfo, error) {
 	var err error
 	info := &NodeInfo{}
 
-	info.HostName, err = uname.Hostname()
+	info.HostName, err = HostName()
 	if err != nil {
 		return nil, err
 	}
 
-	info.OperatingSystemName = uname.OperatingSystemName()
+	info.OperatingSystemName = OperatingSystemName()
 
-	info.OperatingSystemVersion, err = uname.OperatingSystemVersion()
+	info.OperatingSystemVersion, err = OperatingSystemVersion()
 	if err != nil {
 		return nil, err
 	}
 
-	info.FileSystems, err = fs.FileSystems()
+	info.FileSystems, err = FileSystems()
 	if err != nil {
 		return nil, err
 	}
