@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"time"
 
@@ -15,13 +16,14 @@ import (
 	"github.com/stepga/monitor/reporter"
 )
 
+const MaxListenerMessageSize = 5 * 1024 * 1024 // 5 MB
+
 type ListenerCollector struct{}
 
-func parseNodeMsg(conn net.Conn, out chan<- ni.NodeInfo) {
+func jsonDecodeNodeInfo(conn net.Conn, out chan<- ni.NodeInfo) {
 	defer conn.Close()
 
-	const maxMsgSize = 5 * 1024 * 1024 // 5 MB
-	limited := io.LimitReader(conn, maxMsgSize+1)
+	limited := io.LimitReader(conn, MaxListenerMessageSize+1)
 
 	data, err := io.ReadAll(limited)
 	if err != nil {
@@ -29,14 +31,16 @@ func parseNodeMsg(conn net.Conn, out chan<- ni.NodeInfo) {
 		return
 	}
 
-	if len(data) > maxMsgSize {
-		fmt.Println(errors.New("JSON payload exceeds 5 MB limit"))
+	if len(data) > MaxListenerMessageSize {
+		slog.Error("jsonDecodeNodeInfo: JSON payload exceeds max. size",
+			"MaxListenerMessageSize", MaxListenerMessageSize,
+			"size", len(data))
 		return
 	}
 
 	var msg ni.NodeInfo
 	if err := json.NewDecoder(bytes.NewReader(data)).Decode(&msg); err != nil {
-		fmt.Printf("Failed to decode: %s\n", err)
+		slog.Error("jsonDecodeNodeInfo failed", "error", err)
 		return
 	}
 	out <- msg
@@ -59,7 +63,7 @@ func Start(address string, storeMsgChannel chan<- ni.NodeInfo) (net.Listener, er
 					continue
 				}
 			}
-			go parseNodeMsg(conn, storeMsgChannel)
+			go jsonDecodeNodeInfo(conn, storeMsgChannel)
 		}
 	}()
 	return listener, nil
