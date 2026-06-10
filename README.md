@@ -1,17 +1,29 @@
 # monitor
 
-Basic monitoring system with multiple nodes that connect to a daemon
-that sends reports if something needs attention
+Basic monitoring system with multiple nodes.
 
 ## Architecture
 
-Almost no logic on nodes. They start up, report to the daemon
-(single json object) and terminate
+Nodes:
+- have almost no logic
+- start up, send data to the daemon (single json object) and terminate
+- connect autonomously to the daemon
+
+Daemon:
+- listens continuously for new node messages
+- sends reports to configured "reporters" if something needs attention
+
+Reporter:
+a daemon "output plugin" which sends the information (e.g. mail, redmine posts).
+
+Collector:
+a daemon "input plugin" which reads new information, e.g. node information via
+"listener collector", or certificate expiry dates via "cert collector".
 
 ## Features
 
-Dont:
-- verify or authenticate Nodes, anything can report
+Don't:
+- verify or authenticate nodes, anything can send messages
 - track or monitor memory or cpu usage
 - check for processes or services
 
@@ -30,13 +42,25 @@ Try to:
 
 ```
 {
-  "name": "foo.bar.de",
-  "os": "linux",
-  "version": "Ubuntu 24.04.4 LTS"
-  "disks": [
-    ["/boot", 178512, 1046512],
-    ["/mount/foo", 123213, 2321312]
-  ],
-  "apt_reboot_required": true
+  "host_name": "footop",
+  "operating_system_name": "linux",
+  "operating_system_version": "6.12.91",
+  "reboot_required": false,
+  "file_systems": [
+    {
+      "source": "/dev/mapper/foo--vg--extern-root",
+      "used_bytes": 731363332,
+      "available_bytes": 163412204,
+      "capacity": "82%",
+      "mount_point": "/"
+    },
+    {
+      "source": "/dev/nvme0n1p1",
+      "used_bytes": 178512,
+      "available_bytes": 868000,
+      "capacity": "18%",
+      "mount_point": "/boot"
+    }
+  ]
 }
 ```
