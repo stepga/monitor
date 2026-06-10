@@ -26,6 +26,14 @@ func (nodeinfo *NodeInfo) Marshal() ([]byte, error) {
 	return json.Marshal(nodeinfo)
 }
 
+func (nodeinfo *NodeInfo) String() string {
+	data, err := json.MarshalIndent(nodeinfo, "", "  ")
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}
+
 func CreateInfo() (*NodeInfo, error) {
 	var err error
 	info := &NodeInfo{}

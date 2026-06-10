@@ -7,19 +7,11 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"time"
+
+	ni "github.com/stepga/monitor/nodeinfo"
 )
 
-type NodeMsg struct {
-	Name string `json:"name"`
-}
-
-type NodeInfo struct {
-	Name     string
-	LastSeen time.Time
-}
-
-func parseNodeMsg(conn net.Conn, out chan<- NodeMsg) {
+func parseNodeMsg(conn net.Conn, out chan<- ni.NodeInfo) {
 	defer conn.Close()
 
 	const maxMsgSize = 5 * 1024 * 1024 // 5 MB
@@ -36,7 +28,7 @@ func parseNodeMsg(conn net.Conn, out chan<- NodeMsg) {
 		return
 	}
 
-	var msg NodeMsg
+	var msg ni.NodeInfo
 	if err := json.NewDecoder(bytes.NewReader(data)).Decode(&msg); err != nil {
 		fmt.Printf("Failed to decode: %s\n", err)
 		return
@@ -44,7 +36,7 @@ func parseNodeMsg(conn net.Conn, out chan<- NodeMsg) {
 	out <- msg
 }
 
-func Start(address string, storeMsgChannel chan<- NodeMsg) (net.Listener, error) {
+func Start(address string, storeMsgChannel chan<- ni.NodeInfo) (net.Listener, error) {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return nil, fmt.Errorf("listener: %s\n", err)

@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/stepga/monitor/nodeinfo"
+	ni "github.com/stepga/monitor/nodeinfo"
 )
 
 type NodeArguments struct {
@@ -60,7 +60,7 @@ func main() {
 
 	slog.Info("print args demo", "args", args)
 
-	info, err := nodeinfo.CreateInfo()
+	info, err := ni.CreateInfo()
 	if err != nil {
 		slog.Error("CreateInfo() failed", "error", err)
 		os.Exit(1)

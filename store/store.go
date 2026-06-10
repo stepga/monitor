@@ -4,38 +4,37 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stepga/monitor/listener"
+	"github.com/stepga/monitor/nodeinfo"
 )
 
-type NodeInfo struct {
-	Name     string
+type StoreInfo struct {
+	Info     string
 	LastSeen time.Time
+	Name     string
 }
 
 /*
 Store owner has to:
-- go over store every X hour and check for missing nodes
-- accept new node messages and put them in the store
-- publish notifications
+- TODO: go over store every X hour and check for missing nodes
+- TODO: publish notifications
 */
-func Start(storeMsgChannel <-chan listener.NodeMsg) {
-	store := make(map[string]NodeInfo)
+func Start(storeMsgChannel <-chan nodeinfo.NodeInfo) {
+	store := make(map[string]StoreInfo)
 	for msg := range storeMsgChannel {
-		info, exists := store[msg.Name]
-		if exists {
-			fmt.Printf("Client ping: %s\n", msg.Name)
-			info.LastSeen = time.Now()
-			store[msg.Name] = info
+		if _, exists := store[msg.HostName]; exists {
+			fmt.Printf("message from known node: %s\n", msg.HostName)
 		} else {
-			fmt.Printf("New client: %s\n", msg.Name)
-			store[msg.Name] = NodeInfo{
-				Name:     msg.Name,
-				LastSeen: time.Now(),
-			}
+			fmt.Printf("message from unknown node: %s\n", msg.HostName)
+		}
+		store[msg.HostName] = StoreInfo{
+			Name:     msg.HostName,
+			Info:     string(msg.String()),
+			LastSeen: time.Now(),
 		}
 		fmt.Printf("Store:\n")
 		for _, v := range store {
-			fmt.Printf("  %s: %s\n", v.Name, time.Until(v.LastSeen).Round(time.Second))
+			fmt.Printf("%s (last seen before %s): %s\n", v.Name, time.Until(v.LastSeen).Round(time.Second), v.Info)
 		}
+		fmt.Printf("\n")
 	}
 }

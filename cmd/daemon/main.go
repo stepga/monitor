@@ -10,6 +10,7 @@ import (
 
 	"github.com/stepga/monitor/cert"
 	"github.com/stepga/monitor/listener"
+	ni "github.com/stepga/monitor/nodeinfo"
 	"github.com/stepga/monitor/store"
 )
 
@@ -81,7 +82,7 @@ func main() {
 	printCertInfo(info, cfg.Cert.MinimumDaysLeft)
 
 	// TODO: Give thing a good name
-	storeMsgChannel := make(chan listener.NodeMsg)
+	storeMsgChannel := make(chan ni.NodeInfo)
 	go store.Start(storeMsgChannel)
 
 	l, err := listener.Start(cfg.Listener.Address, storeMsgChannel)
