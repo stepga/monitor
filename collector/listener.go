@@ -19,7 +19,7 @@ const MaxListenerMessageSize = 5 * 1024 * 1024 // 5 MB
 
 type ListenerCollector struct{}
 
-func jsonDecodeNodeInfo(conn net.Conn, out chan<- node.NodeInfo) {
+func decodeNodeInfo(conn net.Conn, out chan<- node.NodeInfo) {
 	defer conn.Close()
 
 	limited := io.LimitReader(conn, MaxListenerMessageSize+1)
@@ -31,7 +31,7 @@ func jsonDecodeNodeInfo(conn net.Conn, out chan<- node.NodeInfo) {
 	}
 
 	if len(data) > MaxListenerMessageSize {
-		slog.Error("jsonDecodeNodeInfo: JSON payload exceeds max. size",
+		slog.Error("decodeNodeInfo: payload exceeds max. size",
 			"MaxListenerMessageSize", MaxListenerMessageSize,
 			"size", len(data))
 		return
@@ -39,7 +39,7 @@ func jsonDecodeNodeInfo(conn net.Conn, out chan<- node.NodeInfo) {
 
 	var msg node.NodeInfo
 	if err := json.NewDecoder(bytes.NewReader(data)).Decode(&msg); err != nil {
-		slog.Error("jsonDecodeNodeInfo failed", "error", err)
+		slog.Error("decodeNodeInfo failed", "error", err)
 		return
 	}
 	out <- msg
@@ -62,7 +62,7 @@ func Start(address string, storeMsgChannel chan<- node.NodeInfo) (net.Listener, 
 					continue
 				}
 			}
-			go jsonDecodeNodeInfo(conn, storeMsgChannel)
+			go decodeNodeInfo(conn, storeMsgChannel)
 		}
 	}()
 	return listener, nil
