@@ -39,15 +39,15 @@ func LoadConfig(path string) (*config.Config, error) {
 }
 
 /*
-   Main Reporte implementation
-   Starts reporters from config
+   Main Reporter implementation
+   Multiplexes to reporters from config
 */
 
-type rep struct {
+type multiplexer struct {
 	activeReporters []reporter.Reporter
 }
 
-func (r *rep) Init(cfg *config.Config) {
+func (r *multiplexer) Init(cfg *config.Config) {
 	for name, reporter := range AvailableReporters {
 		if slices.Contains(cfg.Reporter, name) {
 			r.activeReporters = append(r.activeReporters, reporter)
@@ -56,7 +56,7 @@ func (r *rep) Init(cfg *config.Config) {
 	}
 }
 
-func (r *rep) Report(msg string) {
+func (r *multiplexer) Report(msg string) {
 	for _, reporter := range r.activeReporters {
 		reporter.Report(msg)
 	}
@@ -71,12 +71,12 @@ func main() {
 		panic(err)
 	}
 
-	reporter := rep{}
-	reporter.Init(cfg)
+	multiplexer := multiplexer{}
+	multiplexer.Init(cfg)
 
 	for name, collector := range AvailableCollectors {
 		if slices.Contains(cfg.Collectors, name) {
-			collector.Init(cfg, &reporter)
+			collector.Init(cfg, &multiplexer)
 		}
 	}
 
