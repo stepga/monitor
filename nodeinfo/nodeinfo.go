@@ -1,6 +1,8 @@
 package nodeinfo
 
 import (
+	"encoding/json"
+
 	"github.com/stepga/monitor/uname"
 )
 
@@ -23,6 +25,10 @@ type NodeInfo struct {
 	// an array of the mounted filesystems and their respective
 	// used and total sizes in bytes
 	FileSystems []FileSystem `json:"filesystems"`
+}
+
+func (nodeinfo *NodeInfo) Marshal() ([]byte, error) {
+	return json.Marshal(nodeinfo)
 }
 
 func CreateInfo() (*NodeInfo, error) {
