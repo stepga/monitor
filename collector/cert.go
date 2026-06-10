@@ -94,7 +94,7 @@ func (c *CertCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
 			info := CheckCerts(cfg.Cert.Urls)
 			for _, info := range info {
 				if info.Error != nil {
-					reporter.Report(fmt.Sprintf("%s (%dms): ERROR: %s\n",
+					reporter.Report(fmt.Sprintf("%s (%dms): ERROR: %s",
 						info.Url,
 						info.Took.Milliseconds(),
 						info.Error,
@@ -105,7 +105,7 @@ func (c *CertCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
 				if remaining < threshold {
 					reporter.Report(
 						fmt.Sprintf(
-							"%s (%dms): EXPIRES SOON %v remaining, expires %s\n",
+							"%s (%dms): EXPIRES SOON %v remaining, expires %s",
 							info.Url,
 							info.Took.Milliseconds(),
 							remaining,
@@ -114,7 +114,7 @@ func (c *CertCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
 				} else {
 					reporter.Report(
 						fmt.Sprintf(
-							"%s (%dms): OK %v remaining, expires %s\n",
+							"%s (%dms): OK %v remaining, expires %s",
 							info.Url,
 							info.Took.Milliseconds(),
 							remaining,

@@ -83,9 +83,9 @@ func StartStore(storeMsgChannel <-chan node.NodeInfo, reporter reporter.Reporter
 	store := make(map[string]StoreInfo)
 	for msg := range storeMsgChannel {
 		if _, exists := store[msg.HostName]; exists {
-			reporter.Report(fmt.Sprintf("message from known node: %s\n", msg.HostName))
+			reporter.Report(fmt.Sprintf("message from known node: %s", msg.HostName))
 		} else {
-			reporter.Report(fmt.Sprintf("message from unknown node: %s\n", msg.HostName))
+			reporter.Report(fmt.Sprintf("message from unknown node: %s", msg.HostName))
 		}
 		store[msg.HostName] = StoreInfo{
 			Name:     msg.HostName,
@@ -94,7 +94,7 @@ func StartStore(storeMsgChannel <-chan node.NodeInfo, reporter reporter.Reporter
 		}
 		fmt.Printf("Store:\n")
 		for _, v := range store {
-			fmt.Printf("%s (last seen before %s): %s\n", v.Name, time.Until(v.LastSeen).Round(time.Second), v.Info)
+			fmt.Printf("%s (last seen before %s): %s", v.Name, time.Until(v.LastSeen).Round(time.Second), v.Info)
 		}
 		fmt.Printf("\n")
 	}
