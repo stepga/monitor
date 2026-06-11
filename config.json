@@ -1,4 +1,5 @@
 {
+    "webui_address": "0.0.0.0:8899",
     "reporter": ["stdout"],
     "collectors": ["listener", "cert"],
     "listener": {

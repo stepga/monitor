@@ -14,6 +14,7 @@ import (
 	"github.com/stepga/monitor/node"
 	"github.com/stepga/monitor/reporter"
 	"github.com/stepga/monitor/reporter/stdout"
+	"github.com/stepga/monitor/webui"
 )
 
 var AvailableCollectors = map[string]collector.Collector{
@@ -96,6 +97,8 @@ func main() {
 		}
 	}
 
+	webui.InitHttpHandlers(config.Cfg.WebUiAddress)
+
 	reloadSignal := make(chan os.Signal, 1)
 	signal.Notify(reloadSignal, syscall.SIGUSR1)
 	go func() {
@@ -114,5 +117,4 @@ func main() {
 	exitSignal := make(chan os.Signal, 1)
 	signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)
 	<-exitSignal
-
 }

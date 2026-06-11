@@ -3,7 +3,6 @@ package stdout
 import (
 	"fmt"
 	"github.com/stepga/monitor/bus"
-	"github.com/stepga/monitor/node"
 	"github.com/stepga/monitor/reporter"
 )
 
@@ -16,8 +15,6 @@ func (r *StdoutReporter) Init() {
 		defer bus.Unsubscribe(ch)
 		for msg := range ch {
 			switch m := msg.(type) {
-			case node.NodeInfo:
-				fmt.Printf("stdout: NodeInfo from %s\n", m.HostName)
 			case string:
 				fmt.Printf("stdout: Bus msg %s\n", m)
 			case reporter.Report:

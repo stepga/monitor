@@ -19,6 +19,10 @@ type NodeInfo struct {
 	FileSystems []FileSystem `json:"file_systems"`
 }
 
+func (nodeinfo NodeInfo) Report() string {
+	return nodeinfo.String()
+}
+
 func (nodeinfo *NodeInfo) Marshal() ([]byte, error) {
 	return json.Marshal(nodeinfo)
 }

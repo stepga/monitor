@@ -1,0 +1,38 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.container {
+    display: flex;
+    gap: 20px;
+}
+
+.box-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.box-container h2 {
+    margin: 0 0 10px 0;
+    text-align: center;
+}
+
+.scroll-box {
+    width: 48vw;
+    height: 80vh;
+    overflow-y: auto;
+    border: 2px solid #444;
+}
+
+.text-box {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+button {
+    margin-top: 20px;
+}

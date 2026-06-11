@@ -39,4 +39,5 @@ type Config struct {
 	DiskThreshold float64        `json:"diskThreshold"`
 	Cert          CertConfig     `json:"cert"`
 	Listener      ListenerConfig `json:"listener"`
+	WebUiAddress  string         `json:"webui_address"`
 }

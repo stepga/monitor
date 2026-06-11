@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+const BusMsgSize = 16
+
 var (
 	globalBus = &Bus{
 		subscribers: make(map[chan any]struct{}),
@@ -17,7 +19,7 @@ type Bus struct {
 }
 
 func (b *Bus) subscribe() chan any {
-	ch := make(chan any, 16)
+	ch := make(chan any, BusMsgSize)
 	b.lock.Lock()
 	b.subscribers[ch] = struct{}{}
 	b.lock.Unlock()
