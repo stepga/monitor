@@ -5,6 +5,7 @@
         "address": "127.0.0.1:5566",
         "maxMsgSizeMB": 5
     },
+    "diskThreshold": 0.8,
     "cert": {
         "minimum_days_left": 5,
         "urls": [

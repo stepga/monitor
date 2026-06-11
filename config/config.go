@@ -34,8 +34,9 @@ type CertConfig struct {
 }
 
 type Config struct {
-	Reporter   []string       `json:"reporter"`
-	Collectors []string       `json:"collectors"`
-	Cert       CertConfig     `json:"cert"`
-	Listener   ListenerConfig `json:"listener"`
+	Reporter      []string       `json:"reporter"`
+	Collectors    []string       `json:"collectors"`
+	DiskThreshold float64        `json:"diskThreshold"`
+	Cert          CertConfig     `json:"cert"`
+	Listener      ListenerConfig `json:"listener"`
 }
