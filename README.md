@@ -2,6 +2,16 @@
 
 Basic monitoring system with multiple nodes.
 
+## TODOs
+
+* node: implement `reboot_required` (easy)
+* Report(): make format consistent (json?)
+* webui: do not log -vvv into the website
+  * parse json in frontend and print only some/partial reports
+  * do not send all reports to website?
+* webui: keep state which reports are shown/relevant (e.g. send refresh event
+  from server to client)
+
 ## Architecture
 
 Nodes:

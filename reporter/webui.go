@@ -17,13 +17,10 @@ func (r *WebUiReporter) Init() {
 		defer bus.Unsubscribe(ch)
 		for msg := range ch {
 			switch m := msg.(type) {
-			case string:
-				fmt.Printf("webui: Bus msg %s\n", m)
 			case Report:
 				fmt.Printf("webui: Report: %s\n", m.Report())
 				r.RelevantMessages <- m
 			default:
-				fmt.Printf("webui: Unknown message type: %T\n", msg)
 			}
 		}
 	}()
