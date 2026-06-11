@@ -1,5 +1,28 @@
 package config
 
+import (
+	"encoding/json"
+	"os"
+)
+
+var (
+	Cfg Config
+)
+
+func LoadConfig(path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if err := json.NewDecoder(file).Decode(&Cfg); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type ListenerConfig struct {
 	Address string `json:"address"`
 }

@@ -2,14 +2,16 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"slices"
+	"time"
 
+	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/collector"
 	"github.com/stepga/monitor/config"
+	"github.com/stepga/monitor/node"
 	"github.com/stepga/monitor/reporter"
 	"github.com/stepga/monitor/reporter/stdout"
 )
@@ -23,42 +25,42 @@ var AvailableReporters = map[string]reporter.Reporter{
 	"stdout": &stdout.StdoutReporter{},
 }
 
-func LoadConfig(path string) (*config.Config, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var cfg config.Config
-	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
-		return nil, err
-	}
-
-	return &cfg, nil
+type StoreInfo struct {
+	Info     string
+	LastSeen time.Time
+	Name     string
 }
 
 /*
-   Main Reporter implementation
-   Multiplexes to reporters from config
+Store owner has to:
+- TODO: go over store every X hour and check for missing nodes
+- TODO: publish notifications
 */
-
-type multiplexer struct {
-	activeReporters []reporter.Reporter
-}
-
-func (r *multiplexer) Init(cfg *config.Config) {
-	for name, reporter := range AvailableReporters {
-		if slices.Contains(cfg.Reporter, name) {
-			r.activeReporters = append(r.activeReporters, reporter)
-			reporter.Init(cfg)
+func Store() {
+	ch := bus.Subscribe()
+	defer bus.Unsubscribe(ch)
+	store := make(map[string]StoreInfo)
+	for m := range ch {
+		switch msg := m.(type) {
+		case node.NodeInfo:
+			if _, exists := store[msg.HostName]; exists {
+				bus.Publish(fmt.Sprintf("message from known node: %s", msg.HostName))
+			} else {
+				bus.Publish(fmt.Sprintf("message from unknown node: %s", msg.HostName))
+			}
+			store[msg.HostName] = StoreInfo{
+				Name:     msg.HostName,
+				Info:     string(msg.String()),
+				LastSeen: time.Now(),
+			}
+			fmt.Printf("Store:\n")
+			for _, v := range store {
+				fmt.Printf("%s (last seen before %s): %s", v.Name, time.Until(v.LastSeen).Round(time.Second), v.Info)
+			}
+			fmt.Printf("\n")
+		default:
+			// Not interested
 		}
-	}
-}
-
-func (r *multiplexer) Report(msg string) {
-	for _, reporter := range r.activeReporters {
-		reporter.Report(msg)
 	}
 }
 
@@ -66,17 +68,22 @@ func main() {
 	config_file := flag.String("config", "config.json", "Path to config.json file")
 	flag.Parse()
 
-	cfg, err := LoadConfig(*config_file)
+	err := config.LoadConfig(*config_file)
 	if err != nil {
 		panic(err)
 	}
 
-	multiplexer := multiplexer{}
-	multiplexer.Init(cfg)
+	go Store()
+
+	for name, reporter := range AvailableReporters {
+		if slices.Contains(config.Cfg.Reporter, name) {
+			reporter.Init()
+		}
+	}
 
 	for name, collector := range AvailableCollectors {
-		if slices.Contains(cfg.Collectors, name) {
-			collector.Init(cfg, &multiplexer)
+		if slices.Contains(config.Cfg.Collectors, name) {
+			collector.Init()
 		}
 	}
 

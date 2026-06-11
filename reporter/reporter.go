@@ -1,10 +1,9 @@
 package reporter
 
-import (
-	"github.com/stepga/monitor/config"
-)
+type Report interface {
+	Report() string
+}
 
 type Reporter interface {
-	Init(*config.Config)
-	Report(string)
+	Init()
 }

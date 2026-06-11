@@ -8,18 +8,17 @@ import (
 	"io"
 	"log/slog"
 	"net"
-	"time"
 
+	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
 	"github.com/stepga/monitor/node"
-	"github.com/stepga/monitor/reporter"
 )
 
 const MaxListenerMessageSize = 5 * 1024 * 1024 // 5 MB
 
 type ListenerCollector struct{}
 
-func decodeNodeInfo(conn net.Conn, out chan<- node.NodeInfo) {
+func decodeNodeInfo(conn net.Conn) {
 	defer conn.Close()
 
 	limited := io.LimitReader(conn, MaxListenerMessageSize+1)
@@ -42,13 +41,13 @@ func decodeNodeInfo(conn net.Conn, out chan<- node.NodeInfo) {
 		slog.Error("decodeNodeInfo failed", "error", err)
 		return
 	}
-	out <- msg
+	bus.Publish(msg)
 }
 
-func Start(address string, storeMsgChannel chan<- node.NodeInfo) (net.Listener, error) {
-	listener, err := net.Listen("tcp", address)
+func (c *ListenerCollector) Init() {
+	listener, err := net.Listen("tcp", config.Cfg.Listener.Address)
 	if err != nil {
-		return nil, fmt.Errorf("listener: %s\n", err)
+		panic(err)
 	}
 
 	go func() {
@@ -62,51 +61,8 @@ func Start(address string, storeMsgChannel chan<- node.NodeInfo) (net.Listener, 
 					continue
 				}
 			}
-			go decodeNodeInfo(conn, storeMsgChannel)
+			go decodeNodeInfo(conn)
 		}
 	}()
-	return listener, nil
-}
-
-type StoreInfo struct {
-	Info     string
-	LastSeen time.Time
-	Name     string
-}
-
-/*
-Store owner has to:
-- TODO: go over store every X hour and check for missing nodes
-- TODO: publish notifications
-*/
-func StartStore(storeMsgChannel <-chan node.NodeInfo, reporter reporter.Reporter) {
-	store := make(map[string]StoreInfo)
-	for msg := range storeMsgChannel {
-		if _, exists := store[msg.HostName]; exists {
-			reporter.Report(fmt.Sprintf("message from known node: %s", msg.HostName))
-		} else {
-			reporter.Report(fmt.Sprintf("message from unknown node: %s", msg.HostName))
-		}
-		store[msg.HostName] = StoreInfo{
-			Name:     msg.HostName,
-			Info:     string(msg.String()),
-			LastSeen: time.Now(),
-		}
-		fmt.Printf("Store:\n")
-		for _, v := range store {
-			fmt.Printf("%s (last seen before %s): %s", v.Name, time.Until(v.LastSeen).Round(time.Second), v.Info)
-		}
-		fmt.Printf("\n")
-	}
-}
-
-func (c *ListenerCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
-	storeMsgChannel := make(chan node.NodeInfo)
-	go StartStore(storeMsgChannel, reporter)
-
-	l, err := Start(cfg.Listener.Address, storeMsgChannel)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Listening on %s\n", l.Addr())
+	fmt.Printf("Listening on %s\n", listener.Addr())
 }
