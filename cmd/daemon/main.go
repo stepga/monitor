@@ -9,20 +9,16 @@ import (
 	"syscall"
 
 	"github.com/stepga/monitor/bus"
-	"github.com/stepga/monitor/collector"
 	"github.com/stepga/monitor/config"
 	"github.com/stepga/monitor/node"
-	"github.com/stepga/monitor/reporter"
+	"github.com/stepga/monitor/subsystems"
 	"github.com/stepga/monitor/webui"
 )
 
-var AvailableCollectors = map[string]collector.Collector{
-	"cert":     &collector.CertCollector{},
-	"listener": &collector.ListenerCollector{},
-}
-
-var AvailableReporters = map[string]reporter.Reporter{
-	"stdout": &reporter.StdoutReporter{},
+var AvailableSubsystems = map[string]subsystems.Subsystem{
+	"cert":     &subsystems.CertCollector{},
+	"listener": &subsystems.ListenerCollector{},
+	"stdout":   &subsystems.StdoutReporter{},
 }
 
 type DiskGettingFull struct {
@@ -84,15 +80,9 @@ func main() {
 		panic(err)
 	}
 
-	for name, reporter := range AvailableReporters {
-		if slices.Contains(config.Cfg.Reporter, name) {
-			reporter.Init()
-		}
-	}
-
-	for name, collector := range AvailableCollectors {
-		if slices.Contains(config.Cfg.Collectors, name) {
-			collector.Init()
+	for name, subsystem := range AvailableSubsystems {
+		if slices.Contains(config.Cfg.Subsystems, name) {
+			subsystem.Init()
 		}
 	}
 

@@ -8,13 +8,13 @@ import (
 	"net/http"
 
 	"github.com/stepga/monitor/bus"
-	"github.com/stepga/monitor/reporter"
+	"github.com/stepga/monitor/subsystems"
 )
 
 //go:embed assets/*
 var assetsFS embed.FS
 
-var webUiReporter *reporter.WebUiReporter
+var webUiReporter *subsystems.WebUiReporter
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	index_path := "assets/index.html"
@@ -81,7 +81,7 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func InitHttpHandlers(address string) {
-	webUiReporter = &reporter.WebUiReporter{
+	webUiReporter = &subsystems.WebUiReporter{
 		RelevantMessages: make(chan any, bus.BusMsgSize),
 	}
 	webUiReporter.Init()

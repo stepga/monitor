@@ -1,4 +1,4 @@
-package collector
+package subsystems
 
 import (
 	"crypto/tls"

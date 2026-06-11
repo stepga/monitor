@@ -74,3 +74,139 @@ Try to:
   ]
 }
 ```
+
+# Code
+
+## Daemon Architecture
+
+To allow a dynamic configuration of different reportings or data
+collections the daemon is split up into subsystems (TODO better
+name?). On startup the daemon loads a configuration file which is
+globally available as `Cfg` (see `config/config.go`). It then starts
+up all configured subsystems. For all available subsystems, see
+`AvailableSubsystems` in `cmd/daemon/main.go`. The subsystem interface
+is straight forward, it only defines a single method called `Init`
+(see `subsystems/subsystem.go`) which should start its goroutines and
+return.
+Subsystems talk to each other through a global bus (see `bus/bus.go`).
+Some subsystems only generate messages (e.g. `subsystem/cert.go` or
+`subsystem/listener.go`) and others might only consume some of the
+messages (e.g. `subsystem/stdout.go`). They might also do both.
+
+## Example subsystems
+
+Lets say you have a subsystem that generates reports on disk usage
+every hour. All it has to do is call `Publish` on the bus with the
+information about the disks:
+
+```go
+type DiskUsage struct {
+	Path  string // e.g. "/" or "/mnt"
+	Usage int    // Usage in %, between 0 und 100
+}
+
+type DiskUsageReporter struct{}
+
+// Implement subsystem interface
+func (_ *DiskUsageReporter) Init() {
+	go func() {
+		for {
+			// get disk info somehow
+			root := DiskUsage{
+				Path:  "/",
+				Usage: 81,
+			}
+			bus.Publish(root)
+			time.Sleep(1 * time.Hour)
+		}
+	}()
+}
+```
+
+These events could now be tracked by a tracker, that sends errors if a
+disk has a usage over 80% (here `DiskGettingFull`) and sends an ok
+message (here `DiskFineAgain`) if the disk is below the threshold
+again:
+
+```go
+type DiskUsageTracker struct{}
+
+type DiskGettingFull struct {
+	DiskUsage
+}
+
+type DiskFineAgain struct {
+	DiskUsage
+}
+
+func (_ *DiskUsageTracker) Init() {
+	ch := bus.Subscribe()
+	defer bus.Unsubscribe(ch)
+	// Track which disk we already reported
+	reported := make(map[string]struct{})
+	for m := range ch {
+		switch msg := m.(type) {
+		case DiskUsage:
+			_, exists := reported[msg.Path]
+			if msg.Usage > 80 && !exists {
+				// Disk is getting full and we havent
+				// sent a report yet
+				getting_full := DiskGettingFull{}
+				getting_full.Path = msg.Path
+				getting_full.Usage = msg.Usage
+				bus.Publish(getting_full)
+				reported[msg.Path] = struct{}{}
+			} else if msg.Usage < 80 && exists {
+				// Disk where we have sent a report is
+				// below threshold again
+				fine_again := DiskFineAgain{}
+				fine_again.Path = msg.Path
+				fine_again.Usage = msg.Usage
+				bus.Publish(fine_again)
+				delete(reported, msg.Path)
+			}
+		}
+	}
+}
+```
+
+Now we could implement a third subsystem, that simply reports all disk
+messages reported by the tracker by printing them on stdout:
+
+
+```go
+type StdoutReporter struct{}
+
+func (_ *StdoutReporter) Init() {
+	ch := bus.Subscribe()
+	go func() {
+		defer bus.Unsubscribe(ch)
+		for m := range ch {
+			switch msg := m.(type) {
+			case DiskGettingFull:
+				fmt.Printf("Warning, disk %s is getting full: %d%%!\n", msg.Path, msg.Usage)
+			case DiskFineAgain:
+				fmt.Printf("Disk %s is fine again: %d%%.\n", msg.Path, msg.Usage)
+			}
+
+		}
+	}()
+}
+```
+
+To be able to start and stop these from the config file (see
+`subsystems` in `config/config.go`), simply add them to
+`AvailableSubsystems` in `cmd/daemon/main.go`:
+ 
+```go
+var AvailableSubsystems = map[string]subsystems.Subsystem{
+	"DiskUsageReporter": &subsystems.CertCollector{},
+	"DiskUsageTracker":  &DiskUsageTracker{},
+	"StdoutReporter":    &StdoutReporter{},
+}
+```
+
+And add them to the `subsystems` in your `config.json`:
+```json
+   "subsystems": ["DiskUsageReporter", "DiskUsageTracker", "StdoutReporter"],
+```
