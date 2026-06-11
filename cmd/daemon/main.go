@@ -13,7 +13,6 @@ import (
 	"github.com/stepga/monitor/config"
 	"github.com/stepga/monitor/node"
 	"github.com/stepga/monitor/reporter"
-	"github.com/stepga/monitor/reporter/stdout"
 	"github.com/stepga/monitor/webui"
 )
 
@@ -23,7 +22,7 @@ var AvailableCollectors = map[string]collector.Collector{
 }
 
 var AvailableReporters = map[string]reporter.Reporter{
-	"stdout": &stdout.StdoutReporter{},
+	"stdout": &reporter.StdoutReporter{},
 }
 
 type DiskGettingFull struct {

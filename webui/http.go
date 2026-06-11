@@ -14,7 +14,7 @@ import (
 //go:embed assets/*
 var assetsFS embed.FS
 
-var queue chan any
+var webUiReporter *reporter.WebUiReporter
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	index_path := "assets/index.html"
@@ -51,7 +51,7 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 		case <-clientGone:
 			slog.Info("client disconnected")
 			return
-		case msg := <-queue:
+		case msg := <-webUiReporter.RelevantMessages:
 			data, err := json.Marshal(msg)
 			if err != nil {
 				slog.Error("failed to json encode the report, will send as plaintext", "msg", msg)
@@ -80,31 +80,11 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type WebUiReporter struct{}
-
-func (r *WebUiReporter) Init() {
-	fmt.Println("Initialized webui reporter!")
-	ch := bus.Subscribe()
-	go func() {
-		defer bus.Unsubscribe(ch)
-		for msg := range ch {
-			switch m := msg.(type) {
-			case string:
-				fmt.Printf("webui: Bus msg %s\n", m)
-			case reporter.Report:
-				fmt.Printf("webui: Report: %s\n", m.Report())
-				queue <- m
-			default:
-				fmt.Printf("webui: Unknown message type: %T\n", msg)
-			}
-		}
-	}()
-}
-
 func InitHttpHandlers(address string) {
-	foo := &WebUiReporter{}
-	queue = make(chan any, bus.BusMsgSize)
-	foo.Init()
+	webUiReporter = &reporter.WebUiReporter{
+		RelevantMessages: make(chan any, bus.BusMsgSize),
+	}
+	webUiReporter.Init()
 
 	http.HandleFunc("/events", sseHandler)
 	http.HandleFunc("/static/", assetsFileHandler)

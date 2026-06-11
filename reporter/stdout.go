@@ -1,9 +1,8 @@
-package stdout
+package reporter
 
 import (
 	"fmt"
 	"github.com/stepga/monitor/bus"
-	"github.com/stepga/monitor/reporter"
 )
 
 type StdoutReporter struct{}
@@ -17,7 +16,7 @@ func (r *StdoutReporter) Init() {
 			switch m := msg.(type) {
 			case string:
 				fmt.Printf("stdout: Bus msg %s\n", m)
-			case reporter.Report:
+			case Report:
 				fmt.Printf("stdout: Report: %s\n", m.Report())
 			default:
 				fmt.Printf("stdout: Unknown message type: %T\n", msg)
