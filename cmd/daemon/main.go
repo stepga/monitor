@@ -25,6 +25,56 @@ var AvailableReporters = map[string]reporter.Reporter{
 	"stdout": &stdout.StdoutReporter{},
 }
 
+type DiskGettingFull struct {
+	Hostname string
+	Disk     node.FileSystem
+}
+
+type DiskFineAgain struct {
+	Hostname string
+	Disk     node.FileSystem
+}
+
+func (d DiskGettingFull) Report() string {
+	return fmt.Sprintf("Disk %s on %s is getting full: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
+}
+
+func (d DiskFineAgain) Report() string {
+	return fmt.Sprintf("Disk %s on %s is is fine again: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
+}
+
+func DiskWarner() {
+	ch := bus.Subscribe()
+	defer bus.Unsubscribe(ch)
+	disksReported := make(map[string]struct{})
+	for m := range ch {
+		switch msg := m.(type) {
+		case node.NodeInfo:
+			for _, fs := range msg.FileSystems {
+				if fs.Source == "none" {
+					continue
+				}
+				key := msg.HostName + ":" + fs.Source
+				_, exists := disksReported[key]
+				full := float64(fs.UsedBytes) > (float64(fs.AvailableBytes+fs.UsedBytes) * float64(config.Cfg.DiskThreshold))
+				if full && !exists {
+					bus.Publish(DiskGettingFull{
+						Hostname: msg.HostName,
+						Disk:     fs,
+					})
+					disksReported[key] = struct{}{}
+				} else if !full && exists {
+					bus.Publish(DiskFineAgain{
+						Hostname: msg.HostName,
+						Disk:     fs,
+					})
+					delete(disksReported, key)
+				}
+			}
+		}
+	}
+}
+
 func main() {
 	config_file := flag.String("config", "config.json", "Path to config.json file")
 	flag.Parse()
@@ -58,6 +108,8 @@ func main() {
 			}
 		}
 	}()
+
+	go DiskWarner()
 
 	exitSignal := make(chan os.Signal, 1)
 	signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)
