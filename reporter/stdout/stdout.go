@@ -17,7 +17,7 @@ func (r *StdoutReporter) Init() {
 		for msg := range ch {
 			switch m := msg.(type) {
 			case node.NodeInfo:
-				fmt.Printf("stdout: NodeInfo: HostName %s\n", m.HostName)
+				fmt.Printf("stdout: NodeInfo from %s\n", m.HostName)
 			case string:
 				fmt.Printf("stdout: Bus msg %s\n", m)
 			case reporter.Report:
