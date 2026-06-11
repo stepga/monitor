@@ -24,7 +24,8 @@ func LoadConfig(path string) error {
 }
 
 type ListenerConfig struct {
-	Address string `json:"address"`
+	Address      string `json:"address"`
+	MaxMsgSizeMB int    `json:"maxMsgSizeMB"`
 }
 
 type CertConfig struct {

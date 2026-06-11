@@ -2,7 +2,8 @@
     "reporter": ["stdout"],
     "collectors": ["listener", "cert"],
     "listener": {
-        "address": "127.0.0.1:5566"
+        "address": "127.0.0.1:5566",
+        "maxMsgSizeMB": 5
     },
     "cert": {
         "minimum_days_left": 5,

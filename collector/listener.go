@@ -14,14 +14,13 @@ import (
 	"github.com/stepga/monitor/node"
 )
 
-const MaxListenerMessageSize = 5 * 1024 * 1024 // 5 MB
-
 type ListenerCollector struct{}
 
 func decodeNodeInfo(conn net.Conn) {
 	defer conn.Close()
 
-	limited := io.LimitReader(conn, MaxListenerMessageSize+1)
+	msgMax := config.Cfg.Listener.MaxMsgSizeMB * 1024 * 1024
+	limited := io.LimitReader(conn, int64(msgMax+1))
 
 	data, err := io.ReadAll(limited)
 	if err != nil {
@@ -29,9 +28,9 @@ func decodeNodeInfo(conn net.Conn) {
 		return
 	}
 
-	if len(data) > MaxListenerMessageSize {
+	if len(data) > msgMax {
 		slog.Error("decodeNodeInfo: payload exceeds max. size",
-			"MaxListenerMessageSize", MaxListenerMessageSize,
+			"MaxListenerMessageSize", msgMax,
 			"size", len(data))
 		return
 	}
