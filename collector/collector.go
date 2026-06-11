@@ -7,5 +7,4 @@ import (
 
 type Collector interface {
 	Init(*config.Config, reporter.Reporter)
-	Info() interface{}
 }

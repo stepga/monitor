@@ -127,7 +127,3 @@ func (c *CertCollector) Init(cfg *config.Config, reporter reporter.Reporter) {
 		}
 	}()
 }
-
-func (c *CertCollector) Info() interface{} {
-	return nil
-}

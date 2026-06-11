@@ -110,7 +110,3 @@ func (c *ListenerCollector) Init(cfg *config.Config, reporter reporter.Reporter)
 	}
 	fmt.Printf("Listening on %s\n", l.Addr())
 }
-
-func (c *ListenerCollector) Info() interface{} {
-	return nil
-}
