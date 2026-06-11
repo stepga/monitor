@@ -88,6 +88,19 @@ func main() {
 		}
 	}
 
+	reloadSignal := make(chan os.Signal, 1)
+	signal.Notify(reloadSignal, syscall.SIGUSR1)
+	go func() {
+		for {
+			<-reloadSignal
+			fmt.Println("Got USR1, reloading config")
+			err := config.LoadConfig(*config_file)
+			if err != nil {
+				fmt.Printf("Failed to relaod config: %s", err)
+			}
+		}
+	}()
+
 	exitSignal := make(chan os.Signal, 1)
 	signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)
 	<-exitSignal
