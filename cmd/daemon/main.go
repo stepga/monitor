@@ -19,6 +19,7 @@ var AvailableSubsystems = map[string]subsystems.Subsystem{
 	"cert":     &subsystems.CertCollector{},
 	"listener": &subsystems.ListenerCollector{},
 	"stdout":   &subsystems.StdoutReporter{},
+	"pushover": &subsystems.Pushover{},
 }
 
 type DiskGettingFull struct {
@@ -82,7 +83,12 @@ func main() {
 
 	for name, subsystem := range AvailableSubsystems {
 		if slices.Contains(config.Cfg.Subsystems, name) {
-			subsystem.Init()
+			err := subsystem.Init()
+			if err == nil {
+				fmt.Printf("Initialized %s subsystem\n", name)
+			} else {
+				panic(fmt.Errorf("subsystem %s init failed: %s", name, err))
+			}
 		}
 	}
 
