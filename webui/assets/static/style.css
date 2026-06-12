@@ -1,38 +1,27 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
+main {
+    max-width: 900px;
+    margin: 0 auto;
 }
 
-.container {
-    display: flex;
-    gap: 20px;
+.notification.error {
+    border-left: 4px solid #dc2626;
 }
 
-.box-container {
-    display: flex;
-    flex-direction: column;
+.notification.warning {
+    border-left: 4px solid #f59e0b;
 }
 
-.box-container h2 {
-    margin: 0 0 10px 0;
-    text-align: center;
+.notification.success {
+    border-left: 4px solid #16a34a;
 }
 
-.scroll-box {
-    width: 48vw;
-    height: 80vh;
-    overflow-y: auto;
-    border: 2px solid #444;
+.notification.info {
+    border-left: 4px solid #2563eb;
 }
 
-.text-box {
+.filter {
+    border: 1px solid #ddd;
     background: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
-button {
-    margin-top: 20px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
 }
