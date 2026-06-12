@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stepga/monitor/config"
+	"github.com/stepga/monitor/node"
 )
 
 const BusMsgSize = 16
@@ -35,6 +36,18 @@ type NodeTimeout struct {
 // Reported when a new node started
 type NewNode struct {
 	Hostname string
+}
+
+// Reported when a disk is full
+type DiskGettingFull struct {
+	Hostname string
+	Disk     node.FileSystem
+}
+
+// Report when a disk is fine again
+type DiskFineAgain struct {
+	Hostname string
+	Disk     node.FileSystem
 }
 
 // Bus Message interface implementations
@@ -67,6 +80,14 @@ func (info CertInfo) Report() string {
 			info.Expiry.Format(time.UnixDate),
 		)
 	}
+}
+
+func (d DiskGettingFull) Report() string {
+	return fmt.Sprintf("Disk %s on %s is getting full: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
+}
+
+func (d DiskFineAgain) Report() string {
+	return fmt.Sprintf("Disk %s on %s is is fine again: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
 }
 
 // Bus Implementaiton

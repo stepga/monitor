@@ -1,6 +1,6 @@
 {
     "webui_address": "0.0.0.0:8899",
-    "subsystems": ["listener", "cert", "stdout", "webui", "heartbeat"],
+    "subsystems": ["listener", "cert", "stdout", "webui", "heartbeat", "diskmon"],
     "listener": {
         "address": "127.0.0.1:5566",
         "maxMsgSizeMB": 5
