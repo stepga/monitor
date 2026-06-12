@@ -56,5 +56,10 @@ func CreateInfo() (*NodeInfo, error) {
 		return nil, err
 	}
 
+	info.RebootRequired, err = RebootRequired()
+	if err != nil {
+		return nil, err
+	}
+
 	return info, nil
 }

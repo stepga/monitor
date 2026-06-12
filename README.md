@@ -4,7 +4,6 @@ Basic monitoring system with multiple nodes.
 
 ## TODOs
 
-* node: implement `reboot_required` (easy)
 * Report(): make format consistent (json?)
 * webui: do not log -vvv into the website
   * parse json in frontend and print only some/partial reports
