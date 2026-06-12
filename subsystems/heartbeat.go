@@ -12,19 +12,10 @@ type Heartbeat struct {
 	reports map[string]time.Time
 }
 
-type NodeTimeout struct {
-	Hostname string
-	LastSeen time.Time
-}
-
-type NewNode struct {
-	Hostname string
-}
-
 func (h *Heartbeat) nodePing(hostname string) {
 	_, exists := h.reports[hostname]
 	if !exists {
-		bus.Publish(NewNode{
+		bus.Publish(bus.NewNode{
 			Hostname: hostname,
 		})
 	}
@@ -36,7 +27,7 @@ func (h *Heartbeat) tick() {
 	timeout := config.Cfg.Heartbeat.NodeTimeoutInMinutes * time.Minute
 	for hostname, lastSeen := range h.reports {
 		if now.Sub(lastSeen) > timeout {
-			bus.Publish(NodeTimeout{
+			bus.Publish(bus.NodeTimeout{
 				Hostname: hostname,
 				LastSeen: lastSeen,
 			})

@@ -12,43 +12,6 @@ import (
 	"github.com/stepga/monitor/config"
 )
 
-type CertInfo struct {
-	Url    string
-	Expiry *time.Time
-	Error  error
-	Took   time.Duration
-}
-
-func (info CertInfo) Report() string {
-	threshold := time.Duration(config.Cfg.Cert.MinimumDaysLeft*24) * time.Hour
-
-	if info.Error != nil {
-		return fmt.Sprintf("%s (%dms): ERROR: %s",
-			info.Url,
-			info.Took.Milliseconds(),
-			info.Error,
-		)
-	}
-	remaining := time.Until(*info.Expiry)
-	if remaining < threshold {
-		return fmt.Sprintf(
-			"%s (%dms): EXPIRES SOON %v remaining, expires %s",
-			info.Url,
-			info.Took.Milliseconds(),
-			remaining,
-			info.Expiry.Format(time.UnixDate),
-		)
-	} else {
-		return fmt.Sprintf(
-			"%s (%dms): OK %v remaining, expires %s",
-			info.Url,
-			info.Took.Milliseconds(),
-			remaining,
-			info.Expiry.Format(time.UnixDate),
-		)
-	}
-}
-
 type CertCollector struct{}
 
 func certExpiry(rawURL string) (*time.Time, error) {
@@ -87,13 +50,13 @@ func certExpiry(rawURL string) (*time.Time, error) {
 	return &cert.NotAfter, nil
 }
 
-func CheckCerts(urls []string) []CertInfo {
+func CheckCerts(urls []string) []bus.CertInfo {
 	var wg sync.WaitGroup
-	outChan := make(chan CertInfo)
+	outChan := make(chan bus.CertInfo)
 
 	for _, u := range urls {
 		wg.Go(func() {
-			result := CertInfo{Url: u}
+			result := bus.CertInfo{Url: u}
 			start := time.Now()
 			expiry, err := certExpiry(u)
 			result.Took = time.Since(start)
@@ -110,7 +73,7 @@ func CheckCerts(urls []string) []CertInfo {
 		close(outChan)
 	}()
 
-	var results []CertInfo
+	var results []bus.CertInfo
 	for result := range outChan {
 		results = append(results, result)
 	}

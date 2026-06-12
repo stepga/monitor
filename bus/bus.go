@@ -3,6 +3,9 @@ package bus
 import (
 	"fmt"
 	"sync"
+	"time"
+
+	"github.com/stepga/monitor/config"
 )
 
 const BusMsgSize = 16
@@ -12,6 +15,61 @@ var (
 		subscribers: make(map[chan any]struct{}),
 	}
 )
+
+// List of Bus Messages
+
+// Reported for every checked certificate
+type CertInfo struct {
+	Url    string
+	Expiry *time.Time
+	Error  error
+	Took   time.Duration
+}
+
+// Reported when a node stopped reporting
+type NodeTimeout struct {
+	Hostname string
+	LastSeen time.Time
+}
+
+// Reported when a new node started
+type NewNode struct {
+	Hostname string
+}
+
+// Bus Message interface implementations
+
+func (info CertInfo) Report() string {
+	threshold := time.Duration(config.Cfg.Cert.MinimumDaysLeft*24) * time.Hour
+
+	if info.Error != nil {
+		return fmt.Sprintf("%s (%dms): ERROR: %s",
+			info.Url,
+			info.Took.Milliseconds(),
+			info.Error,
+		)
+	}
+	remaining := time.Until(*info.Expiry)
+	if remaining < threshold {
+		return fmt.Sprintf(
+			"%s (%dms): EXPIRES SOON %v remaining, expires %s",
+			info.Url,
+			info.Took.Milliseconds(),
+			remaining,
+			info.Expiry.Format(time.UnixDate),
+		)
+	} else {
+		return fmt.Sprintf(
+			"%s (%dms): OK %v remaining, expires %s",
+			info.Url,
+			info.Took.Milliseconds(),
+			remaining,
+			info.Expiry.Format(time.UnixDate),
+		)
+	}
+}
+
+// Bus Implementaiton
 
 type Bus struct {
 	subscribers map[chan any]struct{}
