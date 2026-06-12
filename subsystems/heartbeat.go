@@ -46,19 +46,22 @@ func (h *Heartbeat) Init() error {
 	go func() {
 		ch := bus.Subscribe()
 		defer bus.Unsubscribe(ch)
+		interval := config.Cfg.Heartbeat.CheckIntervalInMinutes * time.Minute
+		ticker := time.NewTicker(interval)
 		for {
-			interval := config.Cfg.Heartbeat.CheckIntervalInMinutes * time.Minute
-			ticker := time.NewTicker(interval)
 			select {
 			case <-ticker.C:
 				h.tick()
 			case m := <-ch:
 				switch msg := m.(type) {
+				case bus.ConfigReloaded:
+					ticker.Stop()
+					interval = config.Cfg.Heartbeat.CheckIntervalInMinutes * time.Minute
+					ticker = time.NewTicker(interval)
 				case node.NodeInfo:
 					h.nodePing(msg.HostName)
 				}
 			}
-			ticker.Stop()
 		}
 	}()
 
