@@ -63,7 +63,7 @@ func (c *ListenerCollector) Init() error {
 			go decodeNodeInfo(conn)
 		}
 	}()
-	fmt.Printf("Listening on %s\n", listener.Addr())
+	fmt.Printf("Listening for nodes on %s\n", listener.Addr())
 
 	return nil
 }
