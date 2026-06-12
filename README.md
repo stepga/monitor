@@ -140,33 +140,35 @@ type DiskFineAgain struct {
 }
 
 func (_ *DiskUsageTracker) Init() {
-	ch := bus.Subscribe()
-	defer bus.Unsubscribe(ch)
-	// Track which disk we already reported
-	reported := make(map[string]struct{})
-	for m := range ch {
-		switch msg := m.(type) {
-		case DiskUsage:
-			_, exists := reported[msg.Path]
-			if msg.Usage > 80 && !exists {
-				// Disk is getting full and we havent
-				// sent a report yet
-				getting_full := DiskGettingFull{}
-				getting_full.Path = msg.Path
-				getting_full.Usage = msg.Usage
-				bus.Publish(getting_full)
-				reported[msg.Path] = struct{}{}
-			} else if msg.Usage < 80 && exists {
-				// Disk where we have sent a report is
-				// below threshold again
-				fine_again := DiskFineAgain{}
-				fine_again.Path = msg.Path
-				fine_again.Usage = msg.Usage
-				bus.Publish(fine_again)
-				delete(reported, msg.Path)
-			}
-		}
-	}
+    go func() {
+    	ch := bus.Subscribe()
+    	defer bus.Unsubscribe(ch)
+    	// Track which disk we already reported
+    	reported := make(map[string]struct{})
+    	for m := range ch {
+    		switch msg := m.(type) {
+    		case DiskUsage:
+    			_, exists := reported[msg.Path]
+    			if msg.Usage > 80 && !exists {
+    				// Disk is getting full and we havent
+    				// sent a report yet
+    				getting_full := DiskGettingFull{}
+    				getting_full.Path = msg.Path
+    				getting_full.Usage = msg.Usage
+    				bus.Publish(getting_full)
+    				reported[msg.Path] = struct{}{}
+    			} else if msg.Usage < 80 && exists {
+    				// Disk where we have sent a report is
+    				// below threshold again
+    				fine_again := DiskFineAgain{}
+    				fine_again.Path = msg.Path
+    				fine_again.Usage = msg.Usage
+    				bus.Publish(fine_again)
+    				delete(reported, msg.Path)
+    			}
+    		}
+    	}
+    }()
 }
 ```
 
