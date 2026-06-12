@@ -16,11 +16,12 @@ import (
 )
 
 var AvailableSubsystems = map[string]subsystems.Subsystem{
-	"cert":     &subsystems.CertCollector{},
-	"listener": &subsystems.ListenerCollector{},
-	"stdout":   &subsystems.StdoutReporter{},
-	"pushover": &subsystems.Pushover{},
-	"webui":    &webui.Server{},
+	"cert":      &subsystems.CertCollector{},
+	"listener":  &subsystems.ListenerCollector{},
+	"stdout":    &subsystems.StdoutReporter{},
+	"pushover":  &subsystems.Pushover{},
+	"webui":     &webui.Server{},
+	"heartbeat": &subsystems.Heartbeat{},
 }
 
 type DiskGettingFull struct {

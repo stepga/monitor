@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"os"
+	"time"
 )
 
 var (
@@ -33,10 +34,16 @@ type CertConfig struct {
 	Urls            []string `json:"urls"`
 }
 
+type HeartbeatConfig struct {
+	NodeTimeoutInMinutes   time.Duration `json:"node_timeout_in_minutes"`
+	CheckIntervalInMinutes time.Duration `json:"check_interval_in_minutes"`
+}
+
 type Config struct {
-	Subsystems    []string       `json:"subsystems"`
-	DiskThreshold float64        `json:"diskThreshold"`
-	Cert          CertConfig     `json:"cert"`
-	Listener      ListenerConfig `json:"listener"`
-	WebUiAddress  string         `json:"webui_address"`
+	Subsystems    []string        `json:"subsystems"`
+	DiskThreshold float64         `json:"diskThreshold"`
+	Cert          CertConfig      `json:"cert"`
+	Listener      ListenerConfig  `json:"listener"`
+	WebUiAddress  string          `json:"webui_address"`
+	Heartbeat     HeartbeatConfig `json:"heartbeat"`
 }

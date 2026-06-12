@@ -15,6 +15,10 @@ func (r *StdoutReporter) Init() error {
 			switch m := msg.(type) {
 			case string:
 				fmt.Printf("stdout: Bus msg %s\n", m)
+			case NodeTimeout:
+				fmt.Printf("stdout: Node timeout: %s, last seen %v\n", m.Hostname, m.LastSeen)
+			case NewNode:
+				fmt.Printf("stdout: New Node: %s\n", m.Hostname)
 			case Report:
 				fmt.Printf("stdout: Report: %s\n", m.Report())
 			default:

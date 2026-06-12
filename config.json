@@ -1,6 +1,6 @@
 {
     "webui_address": "0.0.0.0:8899",
-    "subsystems": ["listener", "cert", "stdout", "webui"],
+    "subsystems": ["listener", "cert", "stdout", "webui", "heartbeat"],
     "listener": {
         "address": "127.0.0.1:5566",
         "maxMsgSizeMB": 5
@@ -18,5 +18,9 @@
             "https://reddit.com",
             "https://youtube.com"
         ]
+    },
+    "heartbeat": {
+        "node_timeout_in_minutes": 90,
+        "check_interval_in_minutes": 30
     }
 }
