@@ -91,6 +91,16 @@ func (d DiskFineAgain) Report() string {
 	return fmt.Sprintf("Disk %s on %s is is fine again: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
 }
 
+// Oneline impl for bus messages
+
+func (d DiskGettingFull) Oneline() string { return d.Report() }
+func (d DiskFineAgain) Oneline() string   { return d.Report() }
+func (c CertError) Oneline() string       { return c.Report() }
+func (c CertExpiresSoon) Oneline() string { return c.Report() }
+func (c ConfigReloaded) Oneline() string  { return "Configuration reloaded" }
+func (n NewNode) Oneline() string         { return fmt.Sprintf("New Node: %s", n.Hostname) }
+func (n NodeTimeout) Oneline() string     { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
+
 // Bus Implementaiton
 
 type Bus struct {

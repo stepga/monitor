@@ -2,6 +2,7 @@ package node
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type NodeInfo struct {
@@ -21,6 +22,10 @@ type NodeInfo struct {
 
 func (nodeinfo NodeInfo) Report() string {
 	return nodeinfo.String()
+}
+
+func (nodeinfo NodeInfo) Oneline() string {
+	return fmt.Sprintf("Node message from %s", nodeinfo.HostName)
 }
 
 func (nodeinfo *NodeInfo) Marshal() ([]byte, error) {

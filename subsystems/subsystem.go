@@ -7,3 +7,7 @@ type Subsystem interface {
 type Report interface {
 	Report() string
 }
+
+type Oneline interface {
+	Oneline() string
+}

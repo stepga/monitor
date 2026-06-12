@@ -49,7 +49,6 @@ func main() {
 	go func() {
 		for {
 			<-reloadSignal
-			fmt.Println("Got USR1, reloading config")
 			err := config.LoadConfig(*config_file)
 			if err != nil {
 				fmt.Printf("Failed to relaod config: %s", err)

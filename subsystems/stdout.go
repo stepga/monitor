@@ -13,12 +13,10 @@ func (r *StdoutReporter) Init() error {
 		defer bus.Unsubscribe(ch)
 		for msg := range ch {
 			switch m := msg.(type) {
+			case Oneline:
+				fmt.Printf("%s\n", m.Oneline())
 			case string:
 				fmt.Printf("stdout: Bus msg %s\n", m)
-			case bus.NodeTimeout:
-				fmt.Printf("stdout: Node timeout: %s, last seen %v\n", m.Hostname, m.LastSeen)
-			case bus.NewNode:
-				fmt.Printf("stdout: New Node: %s\n", m.Hostname)
 			case Report:
 				fmt.Printf("stdout: Report: %s\n", m.Report())
 			case bus.CertInfo:
