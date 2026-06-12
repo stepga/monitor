@@ -17,23 +17,28 @@ document.addEventListener("DOMContentLoaded", function(){
 		} catch (error) {
 			console.error('Failed to parse JSON in event:', error.message);
 		}
-			};
+	};
 });
 
 function createNotification(type, title, details, timestamp) {
-    const article = document.createElement("article");
-    article.className = `notification ${type}`;
+	const article = document.createElement("article");
+	article.className = `notification ${type.toLowerCase()}`;
 
-    article.innerHTML = `
-        <div class="meta">
-            <span>${type.toUpperCase()}</span>
-            <time>${timestamp}</time>
-        </div>
+	article.innerHTML = `
+	<details ${type.toLowerCase() === "error" ? "open" : ""}>
+		<summary>
+			<div class="header">
+				<span class="badge">${type.toUpperCase()}</span>
+				<span class="title">${title}</span>
+				<time>${timestamp}</time>
+			</div>
+		</summary>
 
-        <h3>${title}</h3>
+		<div class="content">
+			<p>${details}</p>
+		</div>
+	</details>
+	`;
 
-        <p>${details}</p>
-    `;
-
-    return article;
+	return article;
 }
