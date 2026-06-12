@@ -1,6 +1,6 @@
 {
     "webui_address": "0.0.0.0:8899",
-    "subsystems": ["listener", "cert", "stdout"],
+    "subsystems": ["listener", "cert", "stdout", "webui"],
     "listener": {
         "address": "127.0.0.1:5566",
         "maxMsgSizeMB": 5

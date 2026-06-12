@@ -20,6 +20,7 @@ var AvailableSubsystems = map[string]subsystems.Subsystem{
 	"listener": &subsystems.ListenerCollector{},
 	"stdout":   &subsystems.StdoutReporter{},
 	"pushover": &subsystems.Pushover{},
+	"webui":    &webui.Server{},
 }
 
 type DiskGettingFull struct {
@@ -91,8 +92,6 @@ func main() {
 			}
 		}
 	}
-
-	webui.InitHttpHandlers(config.Cfg.WebUiAddress)
 
 	reloadSignal := make(chan os.Signal, 1)
 	signal.Notify(reloadSignal, syscall.SIGUSR1)

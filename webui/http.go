@@ -8,13 +8,12 @@ import (
 	"net/http"
 
 	"github.com/stepga/monitor/bus"
+	"github.com/stepga/monitor/config"
 	"github.com/stepga/monitor/subsystems"
 )
 
 //go:embed assets/*
 var assetsFS embed.FS
-
-var webUiReporter *subsystems.WebUiReporter
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	index_path := "assets/index.html"
@@ -45,26 +44,33 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 	// create a channel for client disconnection
 	clientGone := r.Context().Done()
 
+	ch := bus.Subscribe()
+	defer bus.Unsubscribe(ch)
+
 	responseController := http.NewResponseController(w)
 	for {
 		select {
 		case <-clientGone:
 			slog.Info("client disconnected")
 			return
-		case msg := <-webUiReporter.RelevantMessages:
-			data, err := json.Marshal(msg)
-			if err != nil {
-				slog.Error("failed to json encode the report, will send as plaintext", "msg", msg)
-				sseSendData(w, msg)
-			} else {
-				sseSendData(w, data)
+		case m := <-ch:
+			switch msg := m.(type) {
+			case subsystems.Report:
+				data, err := json.Marshal(msg)
+				if err != nil {
+					slog.Error("failed to json encode the report, will send as plaintext", "msg", msg)
+					sseSendData(w, msg)
+				} else {
+					sseSendData(w, data)
+				}
+
+				err = responseController.Flush()
+				if err != nil {
+					slog.Error("sseHandler() flushing response failed", "error", err)
+					return
+				}
 			}
 
-			err = responseController.Flush()
-			if err != nil {
-				slog.Error("sseHandler() flushing response failed", "error", err)
-				return
-			}
 		}
 	}
 }
@@ -80,11 +86,10 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func InitHttpHandlers(address string) {
-	webUiReporter = &subsystems.WebUiReporter{
-		RelevantMessages: make(chan any, bus.BusMsgSize),
-	}
-	webUiReporter.Init()
+type Server struct{}
+
+func (_ *Server) Init() error {
+	address := config.Cfg.WebUiAddress
 
 	http.HandleFunc("/events", sseHandler)
 	http.HandleFunc("/static/", assetsFileHandler)
@@ -95,4 +100,6 @@ func InitHttpHandlers(address string) {
 		err := http.ListenAndServe(address, nil)
 		slog.Error("ListenAndServe failed", "address", address, "error", err)
 	}()
+
+	return nil
 }
