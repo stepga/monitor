@@ -50,6 +50,9 @@ type DiskFineAgain struct {
 	Disk     node.FileSystem
 }
 
+// Reported when config.Cfg was reloaded
+type ConfigReloaded struct{}
+
 // Bus Message interface implementations
 
 func (info CertInfo) Report() string {

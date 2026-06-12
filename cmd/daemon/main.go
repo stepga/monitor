@@ -8,6 +8,7 @@ import (
 	"slices"
 	"syscall"
 
+	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
 	"github.com/stepga/monitor/subsystems"
 	"github.com/stepga/monitor/webui"
@@ -53,6 +54,7 @@ func main() {
 			if err != nil {
 				fmt.Printf("Failed to relaod config: %s", err)
 			}
+			bus.Publish(bus.ConfigReloaded{})
 		}
 	}()
 
