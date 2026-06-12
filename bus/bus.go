@@ -124,19 +124,67 @@ func (n NodeInfo) Report() string {
 	return string(data)
 }
 
-func (n NodeInfo) WebUiMessage() (string, error) {
-	msg := WebUiMessage{
+func (n NodeInfo) WebUiMessage() WebUiMessage {
+	return WebUiMessage{
 		SubSystemName: "node",
 		Summary:       n.Oneline(),
 		Report:        n.Report(),
 		IsCritical:    false,
 	}
+}
 
-	b, err := json.Marshal(msg)
-	if err != nil {
-		return "", err
+func (c CertError) WebUiMessage() WebUiMessage {
+	return WebUiMessage{
+		SubSystemName: "cert",
+		Summary:       "certificate expiration lookup failed",
+		Report:        c.Report(),
+		IsCritical:    true,
 	}
-	return string(b), nil
+}
+
+func (c CertExpiresSoon) WebUiMessage() WebUiMessage {
+	return WebUiMessage{
+		SubSystemName: "cert",
+		Summary:       c.Report(),
+		Report:        "",
+		IsCritical:    true,
+	}
+}
+
+func (n NodeTimeout) WebUiMessage() WebUiMessage {
+	return WebUiMessage{
+		SubSystemName: "heartbeat",
+		Summary:       n.Oneline(),
+		Report:        "",
+		IsCritical:    true,
+	}
+}
+
+func (n NewNode) WebUiMessage() WebUiMessage {
+	return WebUiMessage{
+		SubSystemName: "heartbeat",
+		Summary:       n.Oneline(),
+		Report:        "",
+		IsCritical:    false,
+	}
+}
+
+func (d DiskGettingFull) WebUiMessage() WebUiMessage {
+	return WebUiMessage{
+		SubSystemName: "diskmon",
+		Summary:       d.Oneline(),
+		Report:        "",
+		IsCritical:    true,
+	}
+}
+
+func (d DiskFineAgain) WebUiMessage() WebUiMessage {
+	return WebUiMessage{
+		SubSystemName: "diskmon",
+		Summary:       d.Oneline(),
+		Report:        "",
+		IsCritical:    false,
+	}
 }
 
 // Oneline impl for bus messages

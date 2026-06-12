@@ -2,6 +2,7 @@ package webui
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 var assetsFS embed.FS
 
 type WebUiMessager interface {
-	WebUiMessage() (string, error)
+	WebUiMessage() bus.WebUiMessage
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,11 +59,13 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 		case m := <-ch:
 			switch msg := m.(type) {
 			case WebUiMessager:
-				webUiMessage, err := msg.WebUiMessage()
+				webUiMessage := msg.WebUiMessage()
+				webUiMessageJson, err := json.Marshal(webUiMessage)
 				if err != nil {
-					slog.Error("creating a WebUiMessage failed", "error", err, "message", m)
+					slog.Error("json encoding of WebUiMessage failed", "error", err, "webUiMessage", webUiMessage)
+					continue
 				}
-				sseSendData(w, webUiMessage)
+				sseSendData(w, string(webUiMessageJson))
 
 				err = responseController.Flush()
 				if err != nil {
@@ -95,7 +98,7 @@ func (_ *Server) Init() error {
 	http.HandleFunc("/", rootHandler)
 
 	go func() {
-		slog.Info("web user interface listens on ", "address", address)
+		slog.Info("webui listens on", "address", address)
 		err := http.ListenAndServe(address, nil)
 		slog.Error("ListenAndServe failed", "address", address, "error", err)
 	}()

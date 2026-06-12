@@ -14,7 +14,7 @@ func (r *StdoutReporter) Init() error {
 		for msg := range ch {
 			switch m := msg.(type) {
 			case Oneline:
-				fmt.Printf("%s\n", m.Oneline())
+				fmt.Printf("stdout: %s\n", m.Oneline())
 			case string:
 				fmt.Printf("stdout: Bus msg %s\n", m)
 			case Report:
