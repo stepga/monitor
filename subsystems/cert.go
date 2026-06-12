@@ -63,7 +63,7 @@ func CheckCerts(urls []string) []bus.CertInfo {
 			if err != nil {
 				result.Error = err
 			} else {
-				result.Expiry = expiry
+				result.Expiry = *expiry
 			}
 			outChan <- result
 		})
@@ -84,8 +84,22 @@ func (c *CertCollector) Init() error {
 	go func() {
 		for {
 			info := CheckCerts(config.Cfg.Cert.Urls)
+			threshold := time.Duration(config.Cfg.Cert.MinimumDaysLeft*24) * time.Hour
 			for _, info := range info {
 				bus.Publish(info)
+				remaining := time.Until(info.Expiry)
+				if info.Error != nil {
+					bus.Publish(bus.CertError{
+						Url:   info.Url,
+						Error: info.Error,
+					})
+				} else if remaining < threshold {
+					bus.Publish(bus.CertExpiresSoon{
+						Url:       info.Url,
+						Remaining: remaining,
+						Expiry:    info.Expiry,
+					})
+				}
 			}
 
 			time.Sleep(1 * time.Minute)

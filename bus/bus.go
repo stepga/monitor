@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stepga/monitor/config"
 	"github.com/stepga/monitor/node"
 )
 
@@ -22,9 +21,22 @@ var (
 // Reported for every checked certificate
 type CertInfo struct {
 	Url    string
-	Expiry *time.Time
+	Expiry time.Time
 	Error  error
 	Took   time.Duration
+}
+
+// Reported when looking up the certificate failed
+type CertError struct {
+	Url   string
+	Error error
+}
+
+// Reported when a cert expires soon
+type CertExpiresSoon struct {
+	Url       string
+	Remaining time.Duration
+	Expiry    time.Time
 }
 
 // Reported when a node stopped reporting
@@ -55,34 +67,20 @@ type ConfigReloaded struct{}
 
 // Bus Message interface implementations
 
-func (info CertInfo) Report() string {
-	threshold := time.Duration(config.Cfg.Cert.MinimumDaysLeft*24) * time.Hour
+func (info CertError) Report() string {
+	return fmt.Sprintf("%s: ERROR: %s",
+		info.Url,
+		info.Error,
+	)
+}
 
-	if info.Error != nil {
-		return fmt.Sprintf("%s (%dms): ERROR: %s",
-			info.Url,
-			info.Took.Milliseconds(),
-			info.Error,
-		)
-	}
-	remaining := time.Until(*info.Expiry)
-	if remaining < threshold {
-		return fmt.Sprintf(
-			"%s (%dms): EXPIRES SOON %v remaining, expires %s",
-			info.Url,
-			info.Took.Milliseconds(),
-			remaining,
-			info.Expiry.Format(time.UnixDate),
-		)
-	} else {
-		return fmt.Sprintf(
-			"%s (%dms): OK %v remaining, expires %s",
-			info.Url,
-			info.Took.Milliseconds(),
-			remaining,
-			info.Expiry.Format(time.UnixDate),
-		)
-	}
+func (info CertExpiresSoon) Report() string {
+	return fmt.Sprintf(
+		"%s: EXPIRES SOON %v remaining, expires %s\n",
+		info.Url,
+		info.Remaining,
+		info.Expiry.Format(time.UnixDate),
+	)
 }
 
 func (d DiskGettingFull) Report() string {

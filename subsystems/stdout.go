@@ -21,6 +21,8 @@ func (r *StdoutReporter) Init() error {
 				fmt.Printf("stdout: New Node: %s\n", m.Hostname)
 			case Report:
 				fmt.Printf("stdout: Report: %s\n", m.Report())
+			case bus.CertInfo:
+				// ignore
 			default:
 				fmt.Printf("stdout: Unknown message type: %T\n", msg)
 			}
