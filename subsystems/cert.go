@@ -102,7 +102,7 @@ func (c *CertCollector) Init() error {
 				}
 			}
 
-			time.Sleep(1 * time.Minute)
+			time.Sleep(config.Cfg.Cert.CheckIntervalInHours * time.Hour)
 		}
 	}()
 

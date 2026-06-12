@@ -8,6 +8,7 @@
     "diskThreshold": 0.8,
     "cert": {
         "minimum_days_left": 5,
+        "check_interval_in_hours": 24,
         "urls": [
             "https://google.com",
             "https://example.com",

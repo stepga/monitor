@@ -42,8 +42,9 @@ type ListenerConfig struct {
 }
 
 type CertConfig struct {
-	MinimumDaysLeft int      `json:"minimum_days_left"`
-	Urls            []string `json:"urls"`
+	MinimumDaysLeft      int           `json:"minimum_days_left"`
+	CheckIntervalInHours time.Duration `json:"check_interval_in_hours"`
+	Urls                 []string      `json:"urls"`
 }
 
 type HeartbeatConfig struct {
