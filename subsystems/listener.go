@@ -11,7 +11,6 @@ import (
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
-	"github.com/stepga/monitor/node"
 )
 
 type ListenerCollector struct{}
@@ -35,7 +34,7 @@ func decodeNodeInfo(conn net.Conn) {
 		return
 	}
 
-	var msg node.NodeInfo
+	var msg bus.NodeInfo
 	if err := json.NewDecoder(bytes.NewReader(data)).Decode(&msg); err != nil {
 		slog.Error("decodeNodeInfo failed", "error", err)
 		return

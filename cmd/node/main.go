@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/node"
 )
 
@@ -51,6 +53,26 @@ func sendData(address string, data []byte) (int, error) {
 	return conn.Write(data)
 }
 
+func createNodeInfo() (*bus.NodeInfo, error) {
+	var err error
+	info := &bus.NodeInfo{}
+
+	info.OperatingSystemName = node.OperatingSystemName()
+	if info.HostName, err = node.HostName(); err != nil {
+		return nil, err
+	}
+	if info.OperatingSystemVersion, err = node.OperatingSystemVersion(); err != nil {
+		return nil, err
+	}
+	if info.FileSystems, err = node.FileSystems(); err != nil {
+		return nil, err
+	}
+	if info.RebootRequired, err = node.RebootRequired(); err != nil {
+		return nil, err
+	}
+	return info, nil
+}
+
 func main() {
 	args, err := parseNodeArguments()
 	if err != nil {
@@ -60,13 +82,13 @@ func main() {
 
 	slog.Info("print args demo", "args", args)
 
-	info, err := node.CreateInfo()
+	info, err := createNodeInfo()
 	if err != nil {
 		slog.Error("CreateInfo() failed", "error", err)
 		os.Exit(1)
 	}
 
-	info_bytes, err := info.Marshal()
+	info_bytes, err := json.Marshal(info)
 	if err != nil {
 		slog.Error("json.Marshal() failed", "error", err)
 		os.Exit(1)

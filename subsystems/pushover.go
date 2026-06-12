@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/stepga/monitor/bus"
-	"github.com/stepga/monitor/node"
 )
 
 type Pushover struct {
@@ -54,7 +53,7 @@ func (p *Pushover) Init() error {
 		for m := range ch {
 			switch msg := m.(type) {
 			// Just Placeholder code for now
-			case node.NodeInfo:
+			case bus.NodeInfo:
 				go p.sendMessage("NodeInfo", fmt.Sprintf("Node %s reported!", msg.HostName))
 			}
 		}

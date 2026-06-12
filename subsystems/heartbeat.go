@@ -6,7 +6,6 @@ import (
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
-	"github.com/stepga/monitor/node"
 )
 
 type Heartbeat struct {
@@ -58,7 +57,7 @@ func (h *Heartbeat) Init() error {
 					ticker.Stop()
 					interval = config.Cfg.Heartbeat.CheckIntervalInMinutes * time.Minute
 					ticker = time.NewTicker(interval)
-				case node.NodeInfo:
+				case bus.NodeInfo:
 					h.nodePing(msg.HostName)
 				}
 			}

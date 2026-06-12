@@ -11,7 +11,7 @@ DAEMON_DEPS :=$(shell find . -name '*.go' -not -path './node/*' -not -path './cm
 bin/daemon: cmd/daemon/main.go $(DAEMON_DEPS)
 	go build -o $@ $<
 
-bin/node: cmd/node/main.go $(NODE_DEPS)
+bin/node: cmd/node/main.go $(NODE_DEPS) bus/bus.go
 	go build -o $@ $<
 
 # If Go code requires CGO, the Go toolchain must invoke a C compiler and linker

@@ -5,7 +5,6 @@ import (
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
-	"github.com/stepga/monitor/node"
 )
 
 type Diskmon struct{}
@@ -21,7 +20,7 @@ func (_ *Diskmon) Init() error {
 		disksReported := make(map[string]struct{})
 		for m := range ch {
 			switch msg := m.(type) {
-			case node.NodeInfo:
+			case bus.NodeInfo:
 				for _, fs := range msg.FileSystems {
 					if fs.Source == "none" {
 						continue

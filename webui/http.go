@@ -2,18 +2,20 @@ package webui
 
 import (
 	"embed"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
-	"github.com/stepga/monitor/subsystems"
 )
 
 //go:embed assets/*
 var assetsFS embed.FS
+
+type WebUiMessager interface {
+	WebUiMessage() (string, error)
+}
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	index_path := "assets/index.html"
@@ -55,19 +57,16 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		case m := <-ch:
 			switch msg := m.(type) {
-			case subsystems.Report:
-				data, err := json.Marshal(msg)
+			case WebUiMessager:
+				webUiMessage, err := msg.WebUiMessage()
 				if err != nil {
-					slog.Error("failed to json encode the report, will send as plaintext", "msg", msg)
-					sseSendData(w, msg)
-				} else {
-					sseSendData(w, data)
+					slog.Error("creating a WebUiMessage failed", "error", err, "message", m)
 				}
+				sseSendData(w, webUiMessage)
 
 				err = responseController.Flush()
 				if err != nil {
 					slog.Error("sseHandler() flushing response failed", "error", err)
-					return
 				}
 			}
 

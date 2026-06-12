@@ -1,6 +1,7 @@
 package bus
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -65,6 +66,30 @@ type DiskFineAgain struct {
 // Reported when config.Cfg was reloaded
 type ConfigReloaded struct{}
 
+// Reported when a node sends a message to the daemon
+type NodeInfo struct {
+	// as reported by `uname -n`
+	HostName string `json:"host_name"`
+	// as reported by `uname -s`
+	OperatingSystemName string `json:"operating_system_name"`
+	// as reported by `uname -r`
+	OperatingSystemVersion string `json:"operating_system_version"`
+	// e.g. due to linux system upgrade and indication via
+	// /var/run/reboot-required
+	RebootRequired bool `json:"reboot_required"`
+	// an array of the mounted filesystems and their respective
+	// used and total sizes in bytes
+	FileSystems []node.FileSystem `json:"file_systems"`
+}
+
+// Report format for WebUI messages sent from daemon to browser
+type WebUiMessage struct {
+	SubSystemName string
+	Summary       string
+	Report        string
+	IsCritical    bool
+}
+
 // Bus Message interface implementations
 
 func (info CertError) Report() string {
@@ -91,6 +116,29 @@ func (d DiskFineAgain) Report() string {
 	return fmt.Sprintf("Disk %s on %s is is fine again: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
 }
 
+func (n NodeInfo) Report() string {
+	data, err := json.MarshalIndent(n, "", "  ")
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}
+
+func (n NodeInfo) WebUiMessage() (string, error) {
+	msg := WebUiMessage{
+		SubSystemName: "node",
+		Summary:       n.Oneline(),
+		Report:        n.Report(),
+		IsCritical:    false,
+	}
+
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
 // Oneline impl for bus messages
 
 func (d DiskGettingFull) Oneline() string { return d.Report() }
@@ -100,6 +148,7 @@ func (c CertExpiresSoon) Oneline() string { return c.Report() }
 func (c ConfigReloaded) Oneline() string  { return "Configuration reloaded" }
 func (n NewNode) Oneline() string         { return fmt.Sprintf("New Node: %s", n.Hostname) }
 func (n NodeTimeout) Oneline() string     { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
+func (n NodeInfo) Oneline() string        { return fmt.Sprintf("Node message from %s", n.HostName) }
 
 // Bus Implementaiton
 
