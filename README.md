@@ -108,7 +108,7 @@ type DiskUsage struct {
 type DiskUsageReporter struct{}
 
 // Implement subsystem interface
-func (_ *DiskUsageReporter) Init() {
+func (_ *DiskUsageReporter) Init() error {
 	go func() {
 		for {
 			// get disk info somehow
@@ -120,6 +120,7 @@ func (_ *DiskUsageReporter) Init() {
 			time.Sleep(1 * time.Hour)
 		}
 	}()
+    return nil
 }
 ```
 
@@ -139,7 +140,7 @@ type DiskFineAgain struct {
 	DiskUsage
 }
 
-func (_ *DiskUsageTracker) Init() {
+func (_ *DiskUsageTracker) Init() error {
     go func() {
     	ch := bus.Subscribe()
     	defer bus.Unsubscribe(ch)
@@ -169,6 +170,7 @@ func (_ *DiskUsageTracker) Init() {
     		}
     	}
     }()
+    return nil
 }
 ```
 
@@ -179,7 +181,7 @@ messages reported by the tracker by printing them on stdout:
 ```go
 type StdoutReporter struct{}
 
-func (_ *StdoutReporter) Init() {
+func (_ *StdoutReporter) Init() error {
 	ch := bus.Subscribe()
 	go func() {
 		defer bus.Unsubscribe(ch)
@@ -193,6 +195,7 @@ func (_ *StdoutReporter) Init() {
 
 		}
 	}()
+    return nil
 }
 ```
 

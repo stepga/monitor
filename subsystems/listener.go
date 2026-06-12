@@ -43,10 +43,10 @@ func decodeNodeInfo(conn net.Conn) {
 	bus.Publish(msg)
 }
 
-func (c *ListenerCollector) Init() {
+func (c *ListenerCollector) Init() error {
 	listener, err := net.Listen("tcp", config.Cfg.Listener.Address)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("listener: %s", err)
 	}
 
 	go func() {
@@ -64,4 +64,6 @@ func (c *ListenerCollector) Init() {
 		}
 	}()
 	fmt.Printf("Listening on %s\n", listener.Addr())
+
+	return nil
 }

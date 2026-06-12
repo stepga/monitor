@@ -10,8 +10,7 @@ type WebUiReporter struct {
 	RelevantMessages chan any
 }
 
-func (r *WebUiReporter) Init() {
-	fmt.Println("Initialized webui reporter!")
+func (r *WebUiReporter) Init() error {
 	ch := bus.Subscribe()
 	go func() {
 		defer bus.Unsubscribe(ch)
@@ -24,4 +23,6 @@ func (r *WebUiReporter) Init() {
 			}
 		}
 	}()
+
+	return nil
 }

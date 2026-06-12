@@ -117,7 +117,7 @@ func CheckCerts(urls []string) []CertInfo {
 	return results
 }
 
-func (c *CertCollector) Init() {
+func (c *CertCollector) Init() error {
 	go func() {
 		for {
 			info := CheckCerts(config.Cfg.Cert.Urls)
@@ -128,4 +128,6 @@ func (c *CertCollector) Init() {
 			time.Sleep(1 * time.Minute)
 		}
 	}()
+
+	return nil
 }

@@ -7,8 +7,7 @@ import (
 
 type StdoutReporter struct{}
 
-func (r *StdoutReporter) Init() {
-	fmt.Println("Initialized stdout reporter!")
+func (r *StdoutReporter) Init() error {
 	ch := bus.Subscribe()
 	go func() {
 		defer bus.Unsubscribe(ch)
@@ -24,4 +23,6 @@ func (r *StdoutReporter) Init() {
 
 		}
 	}()
+
+	return nil
 }

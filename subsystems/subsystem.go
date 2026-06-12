@@ -1,7 +1,7 @@
 package subsystems
 
 type Subsystem interface {
-	Init()
+	Init() error
 }
 
 type Report interface {
