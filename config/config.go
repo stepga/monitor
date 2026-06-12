@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"os"
+	"slices"
 	"time"
 )
 
@@ -22,6 +23,17 @@ func LoadConfig(path string) error {
 	}
 
 	return nil
+}
+
+// Given a list of subsystems returns true if all of them are
+// configured to be started, returns false otherwise
+func AllSubsystemsConfigured(subsystems []string) bool {
+	for _, s := range subsystems {
+		if !slices.Contains(Cfg.Subsystems, s) {
+			return false
+		}
+	}
+	return true
 }
 
 type ListenerConfig struct {

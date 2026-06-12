@@ -1,6 +1,7 @@
 package subsystems
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/stepga/monitor/bus"
@@ -37,6 +38,10 @@ func (h *Heartbeat) tick() {
 }
 
 func (h *Heartbeat) Init() error {
+	if !config.AllSubsystemsConfigured([]string{"listener"}) {
+		return fmt.Errorf("heartbeat requires listener subsystem to be configured")
+	}
+
 	h.reports = make(map[string]time.Time)
 	go func() {
 		ch := bus.Subscribe()

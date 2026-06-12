@@ -1,6 +1,8 @@
 package subsystems
 
 import (
+	"fmt"
+
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
 	"github.com/stepga/monitor/node"
@@ -9,6 +11,10 @@ import (
 type Diskmon struct{}
 
 func (_ *Diskmon) Init() error {
+	if !config.AllSubsystemsConfigured([]string{"listener"}) {
+		return fmt.Errorf("dismon requires listener subsystem to be configured")
+	}
+
 	go func() {
 		ch := bus.Subscribe()
 		defer bus.Unsubscribe(ch)
