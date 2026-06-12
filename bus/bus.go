@@ -10,11 +10,9 @@ import (
 
 const BusMsgSize = 16
 
-var (
-	globalBus = &Bus{
-		subscribers: make(map[chan any]struct{}),
-	}
-)
+var globalBus = &Bus{
+	subscribers: make(map[chan any]struct{}),
+}
 
 // List of Bus Messages
 
