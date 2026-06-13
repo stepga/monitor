@@ -11,7 +11,8 @@ document.addEventListener("DOMContentLoaded", function(){
 					data['SubSystemName'],
 					data['Summary'],
 					data['Report'],
-					date.toLocaleTimeString()
+					date.toLocaleTimeString(),
+					data['IsCritical']
 				)
 			);
 		} catch (error) {
@@ -20,25 +21,22 @@ document.addEventListener("DOMContentLoaded", function(){
 	};
 });
 
-function createNotification(type, title, details, timestamp) {
-	const article = document.createElement("article");
-	article.className = `notification ${type.toLowerCase()}`;
-
-	article.innerHTML = `
-	<details ${type.toLowerCase() === "error" ? "open" : ""}>
-		<summary>
-			<div class="header">
-				<span class="badge">${type.toUpperCase()}</span>
-				<span class="title">${title}</span>
-				<time>${timestamp}</time>
-			</div>
+function createNotification(subsystem, summary, report, timestamp, critical) {
+	const detail = document.createElement("details");
+	detail.innerHTML = `
+		<summary subsystem="${subsystem}" class="${report ? 'collapsable' : ''} ${critical ? 'critical' : '' }">
+			<span class="pre"></span>
+			<span>${timestamp}</span>
+			<span>${summary}</span>
+			<span class="post"></span>
 		</summary>
 
-		<div class="content">
-			<p>${details}</p>
-		</div>
-	</details>
 	`;
-
-	return article;
+	if (report !== "") {
+		detail.insertAdjacentHTML('beforeend', `
+		<div class="content">
+			${report}
+		</div>`);
+	}
+	return detail;
 }
