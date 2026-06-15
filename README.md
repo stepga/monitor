@@ -214,3 +214,22 @@ And add them to the `subsystems` in your `config.json`:
 ```json
    "subsystems": ["DiskUsageReporter", "DiskUsageTracker", "StdoutReporter"],
 ```
+
+## Bus and message interfaces
+
+There are all kinds of messages on the bus, some are just for
+communication between two subsystems, some might be interesting for
+the user and some are important messages that should notify the user.
+Besides multiple subsystems that generated information like the node
+listener or the certificate check, there might also be multiple
+subsystems that report messages to the user, e.g. the stdout reporter
+or the pushover subsystem that sends notifications. These must be able
+to figure out which messages should get reportet. To avoid a big
+switch case in every reporter that filters for the relevant messages,
+all relevant messages implement the Info Interface and important
+messages also implement the Important interface (see `bus/bus.go`).
+This way a new subystem can report new messages that should get
+reportet without having to update all reporting subsystems.
+Having two interfaces allows for filtering, e.g. the pushover
+subystems is only interested in important messages while a logging
+subsystem would log any information.
