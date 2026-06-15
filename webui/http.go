@@ -11,12 +11,15 @@ import (
 	"github.com/stepga/monitor/config"
 )
 
+// Report format for WebUI messages sent from daemon to browser
+type WebUiMessage struct {
+	Summary     string
+	IsImportant bool
+	Details     string
+}
+
 //go:embed assets/*
 var assetsFS embed.FS
-
-type WebUiMessager interface {
-	WebUiMessage() bus.WebUiMessage
-}
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	indexPath := "assets/index.html"
@@ -58,8 +61,17 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		case m := <-ch:
 			switch msg := m.(type) {
-			case WebUiMessager:
-				webUiMessage := msg.WebUiMessage()
+			case bus.Info:
+				isImportant := false
+				if _, ok := msg.(bus.Important); ok {
+					isImportant = true
+				}
+
+				webUiMessage := WebUiMessage{
+					Summary:     msg.Summary(),
+					IsImportant: isImportant,
+					Details:     fmt.Sprintf("%v", msg),
+				}
 				webUiMessageJson, err := json.Marshal(webUiMessage)
 				if err != nil {
 					slog.Error("json encoding of WebUiMessage failed", "error", err, "webUiMessage", webUiMessage)

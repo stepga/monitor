@@ -82,14 +82,6 @@ type NodeInfo struct {
 	FileSystems []node.FileSystem `json:"file_systems"`
 }
 
-// Report format for WebUI messages sent from daemon to browser
-type WebUiMessage struct {
-	SubSystemName string
-	Summary       string
-	Report        string
-	IsCritical    bool
-}
-
 // Bus messages interaces and Reporing
 // Any message that implements the Info interface will get reportet,
 // e.g. displayed on the gui, or written to a log file. It can also
@@ -150,69 +142,6 @@ func (n NodeInfo) Report() string {
 		return ""
 	}
 	return string(data)
-}
-
-func (n NodeInfo) WebUiMessage() WebUiMessage {
-	return WebUiMessage{
-		SubSystemName: "node",
-		Summary:       n.Summary(),
-		Report:        n.Report(),
-		IsCritical:    false,
-	}
-}
-
-func (c CertError) WebUiMessage() WebUiMessage {
-	return WebUiMessage{
-		SubSystemName: "cert",
-		Summary:       "certificate expiration lookup failed",
-		Report:        c.Report(),
-		IsCritical:    true,
-	}
-}
-
-func (c CertExpiresSoon) WebUiMessage() WebUiMessage {
-	return WebUiMessage{
-		SubSystemName: "cert",
-		Summary:       c.Report(),
-		Report:        "",
-		IsCritical:    true,
-	}
-}
-
-func (n NodeTimeout) WebUiMessage() WebUiMessage {
-	return WebUiMessage{
-		SubSystemName: "heartbeat",
-		Summary:       n.Summary(),
-		Report:        "",
-		IsCritical:    true,
-	}
-}
-
-func (n NewNode) WebUiMessage() WebUiMessage {
-	return WebUiMessage{
-		SubSystemName: "heartbeat",
-		Summary:       n.Summary(),
-		Report:        "",
-		IsCritical:    false,
-	}
-}
-
-func (d DiskGettingFull) WebUiMessage() WebUiMessage {
-	return WebUiMessage{
-		SubSystemName: "diskmon",
-		Summary:       d.Summary(),
-		Report:        "",
-		IsCritical:    true,
-	}
-}
-
-func (d DiskFineAgain) WebUiMessage() WebUiMessage {
-	return WebUiMessage{
-		SubSystemName: "diskmon",
-		Summary:       d.Summary(),
-		Report:        "",
-		IsCritical:    false,
-	}
 }
 
 // Summary impl for bus messages
