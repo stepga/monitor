@@ -54,7 +54,7 @@ func (p *Pushover) Init() error {
 			switch msg := m.(type) {
 			// Just Placeholder code for now
 			case bus.NodeInfo:
-				go p.sendMessage("NodeInfo", fmt.Sprintf("Node %s reported!", msg.HostName))
+				go p.sendMessage("NodeInfo", fmt.Sprintf("Node %s reported!", msg.Hostname))
 			}
 		}
 	}()

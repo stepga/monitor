@@ -58,7 +58,7 @@ func createNodeInfo() (*bus.NodeInfo, error) {
 	info := &bus.NodeInfo{}
 
 	info.OperatingSystemName = node.OperatingSystemName()
-	if info.HostName, err = node.HostName(); err != nil {
+	if info.Hostname, err = node.Hostname(); err != nil {
 		return nil, err
 	}
 	if info.OperatingSystemVersion, err = node.OperatingSystemVersion(); err != nil {

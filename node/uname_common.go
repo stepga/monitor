@@ -6,11 +6,11 @@ import (
 	"runtime"
 )
 
-// HostName returns (network node) hostname as reported by `uname -n`.
-func HostName() (string, error) {
+// Hostname returns (network node) hostname as reported by `uname -n`.
+func Hostname() (string, error) {
 	hostname, err := os.Hostname()
 	if err != nil {
-		return "", fmt.Errorf("HostName(): %w", err)
+		return "", fmt.Errorf("Hostname(): %w", err)
 	}
 	return hostname, nil
 }

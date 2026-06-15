@@ -51,7 +51,7 @@ Try to:
 
 ```
 {
-  "host_name": "footop",
+  "hostname": "footop",
   "operating_system_name": "linux",
   "operating_system_version": "6.12.91",
   "reboot_required": false,

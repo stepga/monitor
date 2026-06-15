@@ -69,7 +69,7 @@ type ConfigReloaded struct{}
 // Reported when a node sends a message to the daemon
 type NodeInfo struct {
 	// as reported by `uname -n`
-	HostName string `json:"host_name"`
+	Hostname string `json:"hostname"`
 	// as reported by `uname -s`
 	OperatingSystemName string `json:"operating_system_name"`
 	// as reported by `uname -r`

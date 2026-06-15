@@ -25,18 +25,18 @@ func (_ *Diskmon) Init() error {
 					if fs.Source == "none" {
 						continue
 					}
-					key := msg.HostName + ":" + fs.Source
+					key := msg.Hostname + ":" + fs.Source
 					_, exists := disksReported[key]
 					full := float64(fs.UsedBytes) > (float64(fs.AvailableBytes+fs.UsedBytes) * float64(config.Cfg.DiskThreshold))
 					if full && !exists {
 						bus.Publish(bus.DiskGettingFull{
-							Hostname: msg.HostName,
+							Hostname: msg.Hostname,
 							Disk:     fs,
 						})
 						disksReported[key] = struct{}{}
 					} else if !full && exists {
 						bus.Publish(bus.DiskFineAgain{
-							Hostname: msg.HostName,
+							Hostname: msg.Hostname,
 							Disk:     fs,
 						})
 						delete(disksReported, key)

@@ -58,7 +58,7 @@ func (h *Heartbeat) Init() error {
 					interval = config.Cfg.Heartbeat.CheckIntervalInMinutes * time.Minute
 					ticker = time.NewTicker(interval)
 				case bus.NodeInfo:
-					h.nodePing(msg.HostName)
+					h.nodePing(msg.Hostname)
 				}
 			}
 		}
