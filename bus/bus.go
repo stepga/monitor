@@ -90,15 +90,32 @@ type WebUiMessage struct {
 	IsCritical    bool
 }
 
-// List of Bus message interafaces
+// Bus messages interaces and Reporing
+// Any message that implements the Info interface will get reportet,
+// e.g. displayed on the gui, or written to a log file. It can also
+// implement the Important interace, which should be used for messages
+// that require attention, e.g. a disk is getting full or a
+// certificate is nearing end of life.
 
 type Summary interface {
+	// Single line string describing the message
 	Summary() string
 }
 
+// TODO: Remove, replaced by Info and Important
 type Report interface {
 	Summary
 	Report() string
+}
+
+type Info interface {
+	Summary
+	_info()
+}
+
+type Important interface {
+	Info
+	_important()
 }
 
 // Bus Message interface implementations
@@ -208,6 +225,20 @@ func (c ConfigReloaded) Summary() string  { return "Configuration reloaded" }
 func (n NewNode) Summary() string         { return fmt.Sprintf("New Node: %s", n.Hostname) }
 func (n NodeTimeout) Summary() string     { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
 func (n NodeInfo) Summary() string        { return fmt.Sprintf("Node message from %s", n.Hostname) }
+
+func (DiskGettingFull) _info() {}
+func (DiskFineAgain) _info()   {}
+func (CertError) _info()       {}
+func (CertExpiresSoon) _info() {}
+func (ConfigReloaded) _info()  {}
+func (NewNode) _info()         {}
+func (NodeTimeout) _info()     {}
+func (NodeInfo) _info()        {}
+
+func (DiskGettingFull) _important() {}
+func (CertError) _important()       {}
+func (CertExpiresSoon) _important() {}
+func (NodeTimeout) _important()     {}
 
 // Bus Implementaiton
 

@@ -13,10 +13,12 @@ func (r *StdoutReporter) Init() error {
 		defer bus.Unsubscribe(ch)
 		for msg := range ch {
 			switch m := msg.(type) {
-			case bus.Summary:
-				fmt.Printf("stdout: %s\n", m.Summary())
+			case bus.Important:
+				fmt.Printf("IMPORTANT: %s\n", m.Summary())
+			case bus.Info:
+				fmt.Printf("%s\n", m.Summary())
 			case string:
-				fmt.Printf("stdout: Bus msg %s\n", m)
+				fmt.Printf("Bus msg '%s'\n", m)
 			case bus.CertInfo:
 				// ignore
 			default:
