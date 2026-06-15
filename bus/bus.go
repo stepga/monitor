@@ -97,6 +97,7 @@ type Summary interface {
 }
 
 type Report interface {
+	Summary
 	Report() string
 }
 

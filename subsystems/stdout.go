@@ -17,8 +17,6 @@ func (r *StdoutReporter) Init() error {
 				fmt.Printf("stdout: %s\n", m.Summary())
 			case string:
 				fmt.Printf("stdout: Bus msg %s\n", m)
-			case bus.Report:
-				fmt.Printf("stdout: Report: %s\n", m.Report())
 			case bus.CertInfo:
 				// ignore
 			default:
