@@ -90,6 +90,16 @@ type WebUiMessage struct {
 	IsCritical    bool
 }
 
+// List of Bus message interafaces
+
+type Summary interface {
+	Summary() string
+}
+
+type Report interface {
+	Report() string
+}
+
 // Bus Message interface implementations
 
 func (info CertError) Report() string {
