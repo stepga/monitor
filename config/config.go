@@ -38,7 +38,7 @@ func AllSubsystemsConfigured(subsystems []string) bool {
 
 type ListenerConfig struct {
 	Address      string `json:"address"`
-	MaxMsgSizeMB int    `json:"maxMsgSizeMB"`
+	MaxMsgSizeMB int    `json:"max_msg_size_mb"`
 }
 
 type CertConfig struct {
@@ -54,7 +54,7 @@ type HeartbeatConfig struct {
 
 type Config struct {
 	Subsystems    []string        `json:"subsystems"`
-	DiskThreshold float64         `json:"diskThreshold"`
+	DiskThreshold float64         `json:"disk_threshold"`
 	Cert          CertConfig      `json:"cert"`
 	Listener      ListenerConfig  `json:"listener"`
 	WebUiAddress  string          `json:"webui_address"`

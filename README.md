@@ -152,18 +152,18 @@ func (_ *DiskUsageTracker) Init() error {
     			if msg.Usage > 80 && !exists {
     				// Disk is getting full and we havent
     				// sent a report yet
-    				getting_full := DiskGettingFull{}
-    				getting_full.Path = msg.Path
-    				getting_full.Usage = msg.Usage
-    				bus.Publish(getting_full)
+    				gettingFull := DiskGettingFull{}
+    				gettingFull.Path = msg.Path
+    				gettingFull.Usage = msg.Usage
+    				bus.Publish(gettingFull)
     				reported[msg.Path] = struct{}{}
     			} else if msg.Usage < 80 && exists {
     				// Disk where we have sent a report is
     				// below threshold again
-    				fine_again := DiskFineAgain{}
-    				fine_again.Path = msg.Path
-    				fine_again.Usage = msg.Usage
-    				bus.Publish(fine_again)
+    				fineAgain := DiskFineAgain{}
+    				fineAgain.Path = msg.Path
+    				fineAgain.Usage = msg.Usage
+    				bus.Publish(fineAgain)
     				delete(reported, msg.Path)
     			}
     		}

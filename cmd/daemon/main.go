@@ -25,10 +25,10 @@ var AvailableSubsystems = map[string]subsystems.Subsystem{
 }
 
 func main() {
-	config_file := flag.String("config", "config.json", "Path to config.json file")
+	configFile := flag.String("config", "config.json", "Path to config.json file")
 	flag.Parse()
 
-	err := config.LoadConfig(*config_file)
+	err := config.LoadConfig(*configFile)
 	if err != nil {
 		panic(err)
 	}
@@ -49,7 +49,7 @@ func main() {
 	go func() {
 		for {
 			<-reloadSignal
-			err := config.LoadConfig(*config_file)
+			err := config.LoadConfig(*configFile)
 			if err != nil {
 				fmt.Printf("Failed to relaod config: %s", err)
 			}

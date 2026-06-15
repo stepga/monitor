@@ -88,16 +88,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	info_bytes, err := json.Marshal(info)
+	infoBytes, err := json.Marshal(info)
 	if err != nil {
 		slog.Error("json.Marshal() failed", "error", err)
 		os.Exit(1)
 	}
-	written_bytes, err := sendData(args.address(), info_bytes)
+	writtenBytes, err := sendData(args.address(), infoBytes)
 	if err != nil {
 		slog.Error("sendData() failed", "error", err)
 		os.Exit(1)
 	}
 
-	slog.Info("sendData() succeeded", "daemon address", args.address(), "sent bytes", written_bytes)
+	slog.Info("sendData() succeeded", "daemon address", args.address(), "sent bytes", writtenBytes)
 }

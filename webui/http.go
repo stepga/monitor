@@ -19,13 +19,13 @@ type WebUiMessager interface {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	index_path := "assets/index.html"
-	index_data, err := assetsFS.ReadFile(index_path)
+	indexPath := "assets/index.html"
+	indexData, err := assetsFS.ReadFile(indexPath)
 	if err != nil {
-		slog.Error("ReadFile() failed", "error", err, "index_path", index_path)
+		slog.Error("ReadFile() failed", "error", err, "indexPath", indexPath)
 		return
 	}
-	w.Write(index_data)
+	w.Write(indexData)
 }
 
 func sseSendData(w http.ResponseWriter, data any) {
