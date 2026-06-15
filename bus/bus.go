@@ -127,7 +127,7 @@ func (n NodeInfo) Report() string {
 func (n NodeInfo) WebUiMessage() WebUiMessage {
 	return WebUiMessage{
 		SubSystemName: "node",
-		Summary:       n.Oneline(),
+		Summary:       n.Summary(),
 		Report:        n.Report(),
 		IsCritical:    false,
 	}
@@ -154,7 +154,7 @@ func (c CertExpiresSoon) WebUiMessage() WebUiMessage {
 func (n NodeTimeout) WebUiMessage() WebUiMessage {
 	return WebUiMessage{
 		SubSystemName: "heartbeat",
-		Summary:       n.Oneline(),
+		Summary:       n.Summary(),
 		Report:        "",
 		IsCritical:    true,
 	}
@@ -163,7 +163,7 @@ func (n NodeTimeout) WebUiMessage() WebUiMessage {
 func (n NewNode) WebUiMessage() WebUiMessage {
 	return WebUiMessage{
 		SubSystemName: "heartbeat",
-		Summary:       n.Oneline(),
+		Summary:       n.Summary(),
 		Report:        "",
 		IsCritical:    false,
 	}
@@ -172,7 +172,7 @@ func (n NewNode) WebUiMessage() WebUiMessage {
 func (d DiskGettingFull) WebUiMessage() WebUiMessage {
 	return WebUiMessage{
 		SubSystemName: "diskmon",
-		Summary:       d.Oneline(),
+		Summary:       d.Summary(),
 		Report:        "",
 		IsCritical:    true,
 	}
@@ -181,22 +181,22 @@ func (d DiskGettingFull) WebUiMessage() WebUiMessage {
 func (d DiskFineAgain) WebUiMessage() WebUiMessage {
 	return WebUiMessage{
 		SubSystemName: "diskmon",
-		Summary:       d.Oneline(),
+		Summary:       d.Summary(),
 		Report:        "",
 		IsCritical:    false,
 	}
 }
 
-// Oneline impl for bus messages
+// Summary impl for bus messages
 
-func (d DiskGettingFull) Oneline() string { return d.Report() }
-func (d DiskFineAgain) Oneline() string   { return d.Report() }
-func (c CertError) Oneline() string       { return c.Report() }
-func (c CertExpiresSoon) Oneline() string { return c.Report() }
-func (c ConfigReloaded) Oneline() string  { return "Configuration reloaded" }
-func (n NewNode) Oneline() string         { return fmt.Sprintf("New Node: %s", n.Hostname) }
-func (n NodeTimeout) Oneline() string     { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
-func (n NodeInfo) Oneline() string        { return fmt.Sprintf("Node message from %s", n.HostName) }
+func (d DiskGettingFull) Summary() string { return d.Report() }
+func (d DiskFineAgain) Summary() string   { return d.Report() }
+func (c CertError) Summary() string       { return c.Report() }
+func (c CertExpiresSoon) Summary() string { return c.Report() }
+func (c ConfigReloaded) Summary() string  { return "Configuration reloaded" }
+func (n NewNode) Summary() string         { return fmt.Sprintf("New Node: %s", n.Hostname) }
+func (n NodeTimeout) Summary() string     { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
+func (n NodeInfo) Summary() string        { return fmt.Sprintf("Node message from %s", n.Hostname) }
 
 // Bus Implementaiton
 

@@ -8,6 +8,6 @@ type Report interface {
 	Report() string
 }
 
-type Oneline interface {
-	Oneline() string
+type Summary interface {
+	Summary() string
 }
