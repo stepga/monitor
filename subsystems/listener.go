@@ -42,26 +42,57 @@ func decodeNodeInfo(conn net.Conn) {
 	bus.Publish(msg)
 }
 
-func (c *Listener) Init() error {
-	listener, err := net.Listen("tcp", config.Cfg.Listener.Address)
-	if err != nil {
-		return fmt.Errorf("listener: %s", err)
-	}
-
+// Starts a goroutine that accepts connections from conn and returns a
+// channel which will get filled with accepted connections.
+// Goroutine stops when the listener is closed.
+func acceptor(conn net.Listener) (<-chan net.Conn, error) {
+	out := make(chan net.Conn)
 	go func() {
 		for {
-			conn, err := listener.Accept()
+			conn, err := conn.Accept()
 			if err != nil {
 				if errors.Is(err, net.ErrClosed) {
+					close(out)
 					return
 				} else {
 					fmt.Println("Error accepting conn:", err)
 					continue
 				}
 			}
-			go decodeNodeInfo(conn)
+			out <- conn
 		}
 	}()
+	return out, nil
+}
+
+func (l *Listener) Init() error {
+	listener, err := net.Listen("tcp", config.Cfg.Listener.Address)
+	if err != nil {
+		return fmt.Errorf("listener: %s", err)
+	}
+	out, err := acceptor(listener)
+
+	go func() {
+		ch := bus.Subscribe()
+		defer bus.Unsubscribe(ch)
+		for {
+			select {
+			case conn, ok := <-out:
+				if ok {
+					go decodeNodeInfo(conn)
+				} else {
+					l.Init()
+					return
+				}
+			case m := <-ch:
+				switch m.(type) {
+				case bus.ConfigReloaded:
+					listener.Close()
+				}
+			}
+		}
+	}()
+
 	slog.Info("node listener listens on", "address", listener.Addr())
 
 	return nil
