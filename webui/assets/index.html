@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="static/style.css">
-<script src="static/script.js"></script>
-<title>monitor</title>
-</head>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="static/style.css">
+		<script src="static/script.js"></script>
+		<title>monitor</title>
+	</head>
 
-<body>
+	<body>
+		<h1>Important Notifications</h1>
+		<div id="notifications_sticky">
+		</div>
 
-<fieldset>
-  <legend>Features:</legend>
-  <div>
-    <input type="checkbox" id="verbose" name="verbose" checked />
-    <label for="verbose">Display all (also non-important) messages</label>
-  </div>
-</fieldset>
+		<br>
+		<div>
+			<input type="checkbox" id="verbose" name="verbose" checked />
+			<label for="verbose">Show Live Notifications Log</label>
+		</div>
 
-<main id="notifications">
-</main>
+		<div id="notifications_verbose">
+		</div>
 
-</body>
+	</body>
 </html>

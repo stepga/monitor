@@ -1,56 +1,77 @@
 var verboseDetailsShown = true;
 
-
-document.addEventListener("DOMContentLoaded", function(){
-	const notificationSrc = new EventSource("/notifications");
-	const notificationsElement = document.getElementById("notifications");
-	const verboseCheckbox = document.getElementById("verbose");
-
-	verboseCheckbox.addEventListener("change", function () {
-		const detailsElements = document.querySelectorAll("details");
-		detailsElements.forEach(detail => {
-			if (!detail.children[0].classList.contains("important")) {
-				verboseDetailsShown = this.checked;
-				detail.style.display = this.checked ? "block" : "none";
+function setNotificationsSticky() {
+	const notificationsSticky = document.getElementById("notifications_sticky");
+	fetch("/sticky")
+		.then(response => response.json())
+		.then(data => {
+			notificationsSticky.innerHTML = "";
+			for (var i = 0; i < data.length ; i++) {
+				notification = createNotification(data[i]);
+				notificationsSticky.prepend(notification);
 			}
 		})
+		.catch(error => {
+			console.error('failed to fetch sticky: ' + error);
+		});
+}
+
+function toggleVerboseDetails() {
+	const detailsElements = document.querySelectorAll("details");
+	detailsElements.forEach(detail => {
+		if (detail.className != "important") {
+			verboseDetailsShown = this.checked;
+			detail.style.display = this.checked ? "block" : "none";
+		}
+	})
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+	const eventSource = new EventSource("/notifications");
+	window.addEventListener('beforeunload', () => {
+		// prevent js error on page reload
+		// see: https://bugzilla.mozilla.org/show_bug.cgi?id=833462
+		eventSource.close();
 	});
 
-	notificationSrc.onmessage = (event) => {
+	const verboseCheckbox = document.getElementById("verbose");
+	verboseCheckbox.addEventListener("change", toggleVerboseDetails);
+
+	const notificationsVerbose = document.getElementById("notifications_verbose");
+	eventSource.onmessage = (event) => {
 		try {
 			const data = JSON.parse(event.data);
+			data['IsImportant'] = false;
 			const notification = createNotification(data);
-			notificationsElement.prepend(notification);
+			notificationsVerbose.prepend(notification);
+			setNotificationsSticky()
 		} catch (error) {
 			console.error('Failed to parse JSON in event:', error.message);
 		}
 	};
+
+	setNotificationsSticky();
 });
 
 function createNotification(data) {
-	summary = data['Summary']
-	details = data['Details']
-	important = data['IsImportant']
-
 	var date = new Date();
-	timestamp = date.toLocaleTimeString()
+	var timestamp = date.toLocaleTimeString()
 
 	const detail = document.createElement("details");
 	detail.innerHTML = `
-		<summary class="${details ? 'collapsable' : ''} ${important ? 'important' : '' }">
-			<span class="pre"></span>
+		<summary>
 			<span>${timestamp}</span>
-			<span>${summary}</span>
-			<span class="post"></span>
+			<span>${data['Summary']}</span>
 		</summary>
-
 	`;
 	detail.style.display = verboseDetailsShown ? "block" : "none";
-	if (details !== "") {
+	detail.className = data['IsImportant'] ? "important" : "";
+	if (data['Details']) {
 		detail.insertAdjacentHTML('beforeend', `
 		<div class="details">
-			${details}
+			${data['Details']}
 		</div>`);
 	}
+
 	return detail;
 }

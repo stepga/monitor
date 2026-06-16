@@ -63,7 +63,6 @@ func (s *Server) notificationHandler(w http.ResponseWriter, r *http.Request) {
 		case m := <-ch:
 			switch msg := m.(type) {
 			case bus.Info:
-
 				isImportant := false
 				if _, ok := msg.(bus.Important); ok {
 					isImportant = true
@@ -104,11 +103,22 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) stickyHandler(w http.ResponseWriter, _ *http.Request) {
-	slog.Info("XXX stickyHandler")
+	var messages []WebUiMessage
 	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(store.FetchSticky())
+	for _, sticky := range store.FetchSticky() {
+		messages = append(messages, stickyToWebUiMessage(sticky))
+	}
+	err := json.NewEncoder(w).Encode(messages)
 	if err != nil {
 		slog.Error("stickyHandler() json encoding failed", "error", err)
+	}
+}
+
+func stickyToWebUiMessage(sticky bus.Info) WebUiMessage {
+	return WebUiMessage{
+		Summary:     sticky.Summary(),
+		IsImportant: true,
+		Details:     fmt.Sprintf("%v", sticky),
 	}
 }
 
