@@ -11,6 +11,8 @@ var (
 	Cfg Config
 )
 
+// Loads Config from given file and sets Cfg on success, returns
+// error otherwise
 func LoadConfig(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
