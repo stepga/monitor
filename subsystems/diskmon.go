@@ -11,7 +11,7 @@ type Diskmon struct{}
 
 func (_ *Diskmon) Init() error {
 	if !config.AllSubsystemsConfigured([]string{"listener"}) {
-		return fmt.Errorf("dismon requires listener subsystem to be configured")
+		return fmt.Errorf("diskmon requires listener subsystem to be configured")
 	}
 
 	go func() {
