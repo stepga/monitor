@@ -9,6 +9,7 @@ import (
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
+	"github.com/stepga/monitor/store"
 )
 
 // Report format for WebUI messages sent from daemon to browser
@@ -38,7 +39,7 @@ func sseSendData(w http.ResponseWriter, data any) {
 	}
 }
 
-func sseHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) notificationHandler(w http.ResponseWriter, r *http.Request) {
 	// http headers required for SSE
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -62,6 +63,7 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 		case m := <-ch:
 			switch msg := m.(type) {
 			case bus.Info:
+
 				isImportant := false
 				if _, ok := msg.(bus.Important); ok {
 					isImportant = true
@@ -72,6 +74,7 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 					IsImportant: isImportant,
 					Details:     fmt.Sprintf("%v", msg),
 				}
+
 				webUiMessageJson, err := json.Marshal(webUiMessage)
 				if err != nil {
 					slog.Error("json encoding of WebUiMessage failed", "error", err, "webUiMessage", webUiMessage)
@@ -81,7 +84,7 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 
 				err = responseController.Flush()
 				if err != nil {
-					slog.Error("sseHandler() flushing response failed", "error", err)
+					slog.Error("notificationHandler() flushing response failed", "error", err)
 				}
 			}
 
@@ -100,13 +103,23 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *Server) unresolvedHandler(w http.ResponseWriter, _ *http.Request) {
+	slog.Info("XXX unresolvedHandler")
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewEncoder(w).Encode(store.FetchSticky())
+	if err != nil {
+		slog.Error("unresolvedHandler() json encoding failed", "error", err)
+	}
+}
+
 type Server struct{}
 
-func (_ *Server) Init() error {
+func (s *Server) Init() error {
 	address := config.Cfg.WebUiAddress
 
-	http.HandleFunc("/events", sseHandler)
+	http.HandleFunc("/notifications", s.notificationHandler)
 	http.HandleFunc("/static/", assetsFileHandler)
+	http.HandleFunc("/unresolved", s.unresolvedHandler)
 	http.HandleFunc("/", rootHandler)
 
 	go func() {

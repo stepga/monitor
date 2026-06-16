@@ -1,30 +1,43 @@
-document.addEventListener("DOMContentLoaded", function(){
-	const eventSrc = new EventSource("/events");
-	const feed = document.getElementById("notifications");
+var verboseDetailsShown = true;
 
-	eventSrc.onmessage = (event) => {
-		var date = new Date();
+
+document.addEventListener("DOMContentLoaded", function(){
+	const notificationSrc = new EventSource("/notifications");
+	const notificationsElement = document.getElementById("notifications");
+	const verboseCheckbox = document.getElementById("verbose");
+
+	verboseCheckbox.addEventListener("change", function () {
+		const detailsElements = document.querySelectorAll("details");
+		detailsElements.forEach(detail => {
+			if (!detail.children[0].classList.contains("important")) {
+				verboseDetailsShown = this.checked;
+				detail.style.display = this.checked ? "block" : "none";
+			}
+		})
+	});
+
+	notificationSrc.onmessage = (event) => {
 		try {
 			const data = JSON.parse(event.data);
-			feed.prepend(
-				createNotification(
-					data['SubSystemName'],
-					data['Summary'],
-					data['Report'],
-					date.toLocaleTimeString(),
-					data['IsCritical']
-				)
-			);
+			const notification = createNotification(data);
+			notificationsElement.prepend(notification);
 		} catch (error) {
 			console.error('Failed to parse JSON in event:', error.message);
 		}
 	};
 });
 
-function createNotification(subsystem, summary, report, timestamp, critical) {
+function createNotification(data) {
+	summary = data['Summary']
+	details = data['Details']
+	important = data['IsImportant']
+
+	var date = new Date();
+	timestamp = date.toLocaleTimeString()
+
 	const detail = document.createElement("details");
 	detail.innerHTML = `
-		<summary subsystem="${subsystem}" class="${report ? 'collapsable' : ''} ${critical ? 'critical' : '' }">
+		<summary class="${details ? 'collapsable' : ''} ${important ? 'important' : '' }">
 			<span class="pre"></span>
 			<span>${timestamp}</span>
 			<span>${summary}</span>
@@ -32,10 +45,11 @@ function createNotification(subsystem, summary, report, timestamp, critical) {
 		</summary>
 
 	`;
-	if (report !== "") {
+	detail.style.display = verboseDetailsShown ? "block" : "none";
+	if (details !== "") {
 		detail.insertAdjacentHTML('beforeend', `
-		<div class="content">
-			${report}
+		<div class="details">
+			${details}
 		</div>`);
 	}
 	return detail;

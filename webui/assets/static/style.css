@@ -17,7 +17,7 @@ summary {
   list-style: none;
 }
 
-.content {
+.details {
   margin-top: 1rem;
 }
 
@@ -47,8 +47,16 @@ summary::after {
   vertical-align: middle;
 }
 
-summary.critical::after {
+summary.important::after {
   background: #FF3939;
   color: #ffffff;
   border: 2px solid #D20000;
+}
+
+p, label {
+  font: 1rem "Fira Sans", sans-serif;
+}
+
+input {
+  margin: 0.4rem;
 }
