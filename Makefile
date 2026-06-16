@@ -23,7 +23,7 @@ bin/node_openbsd: cmd/node/main.go $(GO_SOURCES)
 	env CGO_ENABLED=0 GOOS=openbsd go build -o $@ $<
 
 bin/node_pi: cmd/node/main.go $(GO_SOURCES)
-	env GOOS=linux GOARCH=arm GOARM=7 go build -o $@ $<
+	env CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -o $@ $<
 
 clean:
 	rm -rf bin
