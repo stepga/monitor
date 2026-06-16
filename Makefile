@@ -1,4 +1,4 @@
-.PHONY: all daemon node
+.PHONY: all daemon node node_pi
 
 all: daemon node node_openbsd node_pi
 daemon: bin/daemon
@@ -23,7 +23,7 @@ bin/node_openbsd: cmd/node/main.go $(GO_SOURCES)
 	env CGO_ENABLED=0 GOOS=openbsd go build -o $@ $<
 
 bin/node_pi: cmd/node/main.go $(GO_SOURCES)
-	GOOS=linux GOARCH=arm GOARM=7 go build -o $@ $<
+	env GOOS=linux GOARCH=arm GOARM=7 go build -o $@ $<
 
 clean:
 	rm -rf bin
