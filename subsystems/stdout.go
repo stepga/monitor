@@ -6,9 +6,9 @@ import (
 	"os"
 )
 
-type StdoutReporter struct{}
+type Stdout struct{}
 
-func (r *StdoutReporter) Init() error {
+func (r *Stdout) Init() error {
 	ch := bus.Subscribe()
 	go func() {
 		defer bus.Unsubscribe(ch)
