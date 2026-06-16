@@ -60,6 +60,18 @@ func main() {
 		}
 	}()
 
+	dumpStickySignal := make(chan os.Signal, 1)
+	signal.Notify(dumpStickySignal, syscall.SIGUSR2)
+	go func() {
+		for {
+			<-dumpStickySignal
+			fmt.Println("Sticky Messages:")
+			for _, msg := range store.FetchSticky() {
+				fmt.Printf("  %s\n", msg.Summary())
+			}
+		}
+	}()
+
 	exitSignal := make(chan os.Signal, 1)
 	signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)
 	<-exitSignal
