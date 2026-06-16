@@ -230,7 +230,7 @@ To be able to start and stop these from the config file (see
  
 ```go
 var AvailableSubsystems = map[string]subsystems.Subsystem{
-	"DiskUsageReporter": &subsystems.CertCollector{},
+	"DiskUsageReporter": &DiskUsageReporter{},
 	"DiskUsageTracker":  &DiskUsageTracker{},
 	"StdoutReporter":    &StdoutReporter{},
 }
