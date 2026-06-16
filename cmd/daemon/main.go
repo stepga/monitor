@@ -10,6 +10,7 @@ import (
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
+	"github.com/stepga/monitor/store"
 	"github.com/stepga/monitor/subsystems"
 	"github.com/stepga/monitor/webui"
 )
@@ -32,6 +33,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	store.Start()
 
 	for name, subsystem := range AvailableSubsystems {
 		if slices.Contains(config.Cfg.Subsystems, name) {
