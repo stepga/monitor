@@ -129,10 +129,10 @@ func (d DiskFineAgain) Summary() string {
 	return fmt.Sprintf("Disk %s on %s is is fine again: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
 }
 
-func (c ConfigReloaded) Summary() string { return "Configuration reloaded" }
-func (n NewNode) Summary() string        { return fmt.Sprintf("New Node: %s", n.Hostname) }
-func (n NodeTimeout) Summary() string    { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
-func (n NodeInfo) Summary() string       { return fmt.Sprintf("Node message from %s", n.Hostname) }
+func (ConfigReloaded) Summary() string { return "Configuration reloaded" }
+func (n NewNode) Summary() string      { return fmt.Sprintf("New Node: %s", n.Hostname) }
+func (n NodeTimeout) Summary() string  { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
+func (n NodeInfo) Summary() string     { return fmt.Sprintf("Node message from %s", n.Hostname) }
 
 func (DiskGettingFull) _info() {}
 func (DiskFineAgain) _info()   {}
