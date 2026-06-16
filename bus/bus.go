@@ -86,6 +86,16 @@ type NodeInfo struct {
 	FileSystems []node.FileSystem `json:"file_systems"`
 }
 
+// Reported when a Node requires reboot
+type RebootRequired struct {
+	Hostname string
+}
+
+// Reported when a Node was rebooted
+type Rebooted struct {
+	Hostname string
+}
+
 // Bus messages interfaces and Reporting
 //
 // Any message that implements the Info interface will get reported,
@@ -156,6 +166,12 @@ func (ConfigReloaded) Summary() string { return "Configuration reloaded" }
 func (n NewNode) Summary() string      { return fmt.Sprintf("New Node: %s", n.Hostname) }
 func (n NodeTimeout) Summary() string  { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
 func (n NodeInfo) Summary() string     { return fmt.Sprintf("Node message from %s", n.Hostname) }
+func (n RebootRequired) Summary() string {
+	return fmt.Sprintf("Node %s needs to be rebooted", n.Hostname)
+}
+func (n Rebooted) Summary() string {
+	return fmt.Sprintf("Node %s was rebooted", n.Hostname)
+}
 
 func (d DiskGettingFull) ID() any { return d.Hostname + ":" + d.Disk.Source }
 func (d DiskFineAgain) ID() any   { return d.Hostname + ":" + d.Disk.Source }
@@ -166,6 +182,8 @@ func (c ConfigReloaded) ID() any  { return "ConfigReloaded" }
 func (n NewNode) ID() any         { return n.Hostname }
 func (n NodeTimeout) ID() any     { return n.Hostname }
 func (n NodeInfo) ID() any        { return n.Hostname }
+func (n RebootRequired) ID() any  { return "Reboot:" + n.Hostname }
+func (n Rebooted) ID() any        { return "Reboot:" + n.Hostname }
 
 func (DiskGettingFull) _info() {}
 func (DiskFineAgain) _info()   {}
@@ -176,16 +194,20 @@ func (ConfigReloaded) _info()  {}
 func (NewNode) _info()         {}
 func (NodeTimeout) _info()     {}
 func (NodeInfo) _info()        {}
+func (RebootRequired) _info()  {}
+func (Rebooted) _info()        {}
 
 func (DiskGettingFull) _important() {}
 func (CertError) _important()       {}
 func (CertExpiresSoon) _important() {}
 func (NodeTimeout) _important()     {}
+func (RebootRequired) _important()  {}
 
 func (DiskGettingFull) _sticky() {}
 func (CertError) _sticky()       {}
 func (CertExpiresSoon) _sticky() {}
 func (NodeTimeout) _sticky()     {}
+func (RebootRequired) _sticky()  {}
 
 // Bus Implementaiton
 

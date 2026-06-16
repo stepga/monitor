@@ -23,6 +23,7 @@ var AvailableSubsystems = map[string]subsystems.Subsystem{
 	"webui":     &webui.Server{},
 	"heartbeat": &subsystems.Heartbeat{},
 	"diskmon":   &subsystems.Diskmon{},
+	"rebootmon": &subsystems.Rebootmon{},
 }
 
 func main() {
