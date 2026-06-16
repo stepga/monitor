@@ -12,7 +12,7 @@ import (
 	"github.com/stepga/monitor/config"
 )
 
-type CertCollector struct{}
+type CertCheck struct{}
 
 func certExpiry(rawURL string) (*time.Time, error) {
 	u, err := url.Parse(rawURL)
@@ -80,7 +80,7 @@ func CheckCerts(urls []string) []bus.CertInfo {
 	return results
 }
 
-func (c *CertCollector) Init() error {
+func (c *CertCheck) Init() error {
 	go func() {
 		for {
 			info := CheckCerts(config.Cfg.Cert.Urls)

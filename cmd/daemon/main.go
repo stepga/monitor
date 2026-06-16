@@ -15,7 +15,7 @@ import (
 )
 
 var AvailableSubsystems = map[string]subsystems.Subsystem{
-	"cert":      &subsystems.CertCollector{},
+	"cert":      &subsystems.CertCheck{},
 	"listener":  &subsystems.ListenerCollector{},
 	"stdout":    &subsystems.StdoutReporter{},
 	"pushover":  &subsystems.Pushover{},
