@@ -79,12 +79,13 @@ type NodeInfo struct {
 	FileSystems []node.FileSystem `json:"file_systems"`
 }
 
-// Bus messages interaces and Reporing
-// Any message that implements the Info interface will get reportet,
-// e.g. displayed on the gui, or written to a log file. It can also
-// implement the Important interace, which should be used for messages
-// that require attention, e.g. a disk is getting full or a
-// certificate is nearing end of life.
+// Bus messages interfaces and Reporting
+//
+// Any message that implements the Info interface will get reported,
+// e.g. displayed on the gui, or written to a log file.
+// A message can also implement the Important interface, which should
+// be used for messages that require attention, e.g. a disk is getting
+// full or a certificate is nearing end of life.
 
 type Summary interface {
 	// Single line string describing the message
