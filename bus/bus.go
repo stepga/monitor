@@ -111,12 +111,12 @@ type Summary interface {
 
 type Info interface {
 	Summary
-	ID() any
+	Identifier() any
 	_info()
 }
 
 // Sticky messages are alerts that stay active until a non-sticky
-// message with the same ID is published which clears it again.
+// message with the same Identifier is published which clears it again.
 type Sticky interface {
 	Info
 	_sticky()
@@ -173,17 +173,17 @@ func (n Rebooted) Summary() string {
 	return fmt.Sprintf("Node %s was rebooted", n.Hostname)
 }
 
-func (d DiskGettingFull) ID() any { return d.Hostname + ":" + d.Disk.Source }
-func (d DiskFineAgain) ID() any   { return d.Hostname + ":" + d.Disk.Source }
-func (c CertError) ID() any       { return c.Url }
-func (c CertExpiresSoon) ID() any { return c.Url }
-func (c CertOk) ID() any          { return c.Url }
-func (c ConfigReloaded) ID() any  { return "ConfigReloaded" }
-func (n NewNode) ID() any         { return n.Hostname }
-func (n NodeTimeout) ID() any     { return n.Hostname }
-func (n NodeInfo) ID() any        { return n.Hostname }
-func (n RebootRequired) ID() any  { return "Reboot:" + n.Hostname }
-func (n Rebooted) ID() any        { return "Reboot:" + n.Hostname }
+func (d DiskGettingFull) Identifier() any { return d.Hostname + ":" + d.Disk.Source }
+func (d DiskFineAgain) Identifier() any   { return d.Hostname + ":" + d.Disk.Source }
+func (c CertError) Identifier() any       { return c.Url }
+func (c CertExpiresSoon) Identifier() any { return c.Url }
+func (c CertOk) Identifier() any          { return c.Url }
+func (c ConfigReloaded) Identifier() any  { return "ConfigReloaded" }
+func (n NewNode) Identifier() any         { return n.Hostname }
+func (n NodeTimeout) Identifier() any     { return n.Hostname }
+func (n NodeInfo) Identifier() any        { return n.Hostname }
+func (n RebootRequired) Identifier() any  { return "Reboot:" + n.Hostname }
+func (n Rebooted) Identifier() any        { return "Reboot:" + n.Hostname }
 
 func (DiskGettingFull) _info() {}
 func (DiskFineAgain) _info()   {}

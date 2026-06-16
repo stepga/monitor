@@ -23,11 +23,11 @@ func Start() {
 			switch msg := m.(type) {
 			case bus.Sticky:
 				store.lock.Lock()
-				store.sticky[msg.ID()] = msg
+				store.sticky[msg.Identifier()] = msg
 				store.lock.Unlock()
 			case bus.Info:
 				store.lock.Lock()
-				delete(store.sticky, msg.ID())
+				delete(store.sticky, msg.Identifier())
 				store.lock.Unlock()
 			}
 		}
