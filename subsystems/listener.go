@@ -42,14 +42,14 @@ func decodeNodeInfo(conn net.Conn) {
 	bus.Publish(msg)
 }
 
-// Starts a goroutine that accepts connections from conn and returns a
-// channel which will get filled with accepted connections.
+// Starts a goroutine that accepts connections from listener and
+// returns a channel which will get filled with accepted connections.
 // Goroutine stops when the listener is closed.
-func acceptor(conn net.Listener) (<-chan net.Conn, error) {
+func acceptor(listener net.Listener) <-chan net.Conn {
 	out := make(chan net.Conn)
 	go func() {
 		for {
-			conn, err := conn.Accept()
+			conn, err := listener.Accept()
 			if err != nil {
 				if errors.Is(err, net.ErrClosed) {
 					close(out)
@@ -62,7 +62,7 @@ func acceptor(conn net.Listener) (<-chan net.Conn, error) {
 			out <- conn
 		}
 	}()
-	return out, nil
+	return out
 }
 
 func (l *Listener) Init() error {
@@ -70,7 +70,7 @@ func (l *Listener) Init() error {
 	if err != nil {
 		return fmt.Errorf("listener: %s", err)
 	}
-	out, err := acceptor(listener)
+	out := acceptor(listener)
 
 	go func() {
 		ch := bus.Subscribe()
