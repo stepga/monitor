@@ -63,17 +63,7 @@ func (s *Server) notificationHandler(w http.ResponseWriter, r *http.Request) {
 		case m := <-ch:
 			switch msg := m.(type) {
 			case bus.Info:
-				isImportant := false
-				if _, ok := msg.(bus.Important); ok {
-					isImportant = true
-				}
-
-				webUiMessage := WebUiMessage{
-					Summary:     msg.Summary(),
-					IsImportant: isImportant,
-					Details:     fmt.Sprintf("%v", msg),
-				}
-
+				webUiMessage := infoToWebUiMessage(msg)
 				webUiMessageJson, err := json.Marshal(webUiMessage)
 				if err != nil {
 					slog.Error("json encoding of WebUiMessage failed", "error", err, "webUiMessage", webUiMessage)
@@ -106,7 +96,7 @@ func (s *Server) stickyHandler(w http.ResponseWriter, _ *http.Request) {
 	var messages []WebUiMessage
 	w.Header().Set("Content-Type", "application/json")
 	for _, sticky := range store.FetchSticky() {
-		messages = append(messages, stickyToWebUiMessage(sticky))
+		messages = append(messages, infoToWebUiMessage(sticky))
 	}
 	err := json.NewEncoder(w).Encode(messages)
 	if err != nil {
@@ -114,11 +104,25 @@ func (s *Server) stickyHandler(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func stickyToWebUiMessage(sticky bus.Info) WebUiMessage {
+func infoToWebUiMessage(info bus.Info) WebUiMessage {
+	var details string
+	details_bytes, err := json.Marshal(info)
+	if err == nil {
+		details = string(details_bytes)
+	} else {
+		slog.Error("json encoding of sticky/bus.Info failed", "error", err, "sticky", info)
+		details = fmt.Sprintf("%#v", info)
+	}
+
+	isImportant := false
+	if _, ok := info.(bus.Important); ok {
+		isImportant = true
+	}
+
 	return WebUiMessage{
-		Summary:     sticky.Summary(),
-		IsImportant: true,
-		Details:     fmt.Sprintf("%v", sticky),
+		Summary:     info.Summary(),
+		IsImportant: isImportant,
+		Details:     details,
 	}
 }
 
