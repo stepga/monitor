@@ -16,16 +16,6 @@ function setNotificationsSticky() {
 		});
 }
 
-function toggleVerboseDetails() {
-	const detailsElements = document.querySelectorAll("details");
-	detailsElements.forEach(detail => {
-		if (detail.className != "important") {
-			verboseDetailsShown = this.checked;
-			detail.style.display = this.checked ? "block" : "none";
-		}
-	})
-}
-
 document.addEventListener("DOMContentLoaded", function(){
 	const eventSource = new EventSource("/notifications");
 	window.addEventListener('beforeunload', () => {
@@ -35,12 +25,16 @@ document.addEventListener("DOMContentLoaded", function(){
 	});
 
 	const verboseCheckbox = document.getElementById("verbose");
-	verboseCheckbox.addEventListener("change", toggleVerboseDetails);
-
 	const notificationsVerbose = document.getElementById("notifications_verbose");
+	verboseCheckbox.addEventListener("change", function() {
+		verboseDetailsShown = this.checked;
+		notificationsVerbose.style.display = this.checked ? "block" : "none";
+	});
+
 	eventSource.onmessage = (event) => {
 		try {
 			const data = JSON.parse(event.data);
+			// enforce `data['IsImportant'] = false` for notifications in the verbose log
 			data['IsImportant'] = false;
 			const notification = createNotification(data);
 			notificationsVerbose.prepend(notification);
