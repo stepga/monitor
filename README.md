@@ -92,6 +92,32 @@ Some subsystems only generate messages (e.g. `subsystem/cert.go` or
 `subsystem/listener.go`) and others might only consume some of the
 messages (e.g. `subsystem/stdout.go`). They might also do both.
 
+```
+┌──────────────────────┐
+│       subsystem      │
+│──────────────────────│
+│ Publish(any) ────────│────┐
+│                      │    │
+│ Subscribe() ─────────│──┐ │
+│ returns channel      │  │ │
+│ ┌──────────────────┐ │  │ │
+│ │     channel      │ │  │ │
+│ └─────────▲────────┘ │  │ │
+└───────────│──────────┘  │ │
+     msg    │             │ │
+   delivery │             │ │
+            │             │ │
+            │    ┌────────▼─▼────────┐
+            └────┤        bus        │
+                 │───────────────────│
+                 │ Publish(any)      │
+                 │ Subscribe() chan  │
+                 │ Unsubscribe(chan) │
+                 └───────────────────┘
+```
+Anything can publish messages on the bus, they will get delivered to
+everyone that subscribed.
+
 ## Example subsystems
 
 Lets say you have a subsystem that generates reports on disk usage
