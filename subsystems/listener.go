@@ -13,7 +13,7 @@ import (
 	"github.com/stepga/monitor/config"
 )
 
-type ListenerCollector struct{}
+type Listener struct{}
 
 func decodeNodeInfo(conn net.Conn) {
 	defer conn.Close()
@@ -42,7 +42,7 @@ func decodeNodeInfo(conn net.Conn) {
 	bus.Publish(msg)
 }
 
-func (c *ListenerCollector) Init() error {
+func (c *Listener) Init() error {
 	listener, err := net.Listen("tcp", config.Cfg.Listener.Address)
 	if err != nil {
 		return fmt.Errorf("listener: %s", err)
