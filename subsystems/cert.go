@@ -99,6 +99,12 @@ func (c *CertCheck) Init() error {
 						Remaining: remaining,
 						Expiry:    info.Expiry,
 					})
+				} else {
+					bus.Publish(bus.CertOk{
+						Url:       info.Url,
+						Remaining: remaining,
+						Expiry:    info.Expiry,
+					})
 				}
 			}
 

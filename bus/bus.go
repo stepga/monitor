@@ -37,6 +37,13 @@ type CertExpiresSoon struct {
 	Expiry    time.Time
 }
 
+// Reported when a cert is ok
+type CertOk struct {
+	Url       string
+	Remaining time.Duration
+	Expiry    time.Time
+}
+
 // Reported when a node stopped reporting
 type NodeTimeout struct {
 	Hostname string
@@ -94,7 +101,15 @@ type Summary interface {
 
 type Info interface {
 	Summary
+	ID() any
 	_info()
+}
+
+// Sticky messages are alerts that stay active until a non-sticky
+// message with the same ID is published which clears it again.
+type Sticky interface {
+	Info
+	_sticky()
 }
 
 type Important interface {
@@ -120,6 +135,15 @@ func (info CertExpiresSoon) Summary() string {
 	)
 }
 
+func (info CertOk) Summary() string {
+	return fmt.Sprintf(
+		"%s: ok, %v remaining, expires at %s",
+		info.Url,
+		info.Remaining,
+		info.Expiry.Format(time.UnixDate),
+	)
+}
+
 func (d DiskGettingFull) Summary() string {
 	return fmt.Sprintf("Disk %s on %s is getting full: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
 }
@@ -133,10 +157,21 @@ func (n NewNode) Summary() string      { return fmt.Sprintf("New Node: %s", n.Ho
 func (n NodeTimeout) Summary() string  { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
 func (n NodeInfo) Summary() string     { return fmt.Sprintf("Node message from %s", n.Hostname) }
 
+func (d DiskGettingFull) ID() any { return d.Hostname + ":" + d.Disk.Source }
+func (d DiskFineAgain) ID() any   { return d.Hostname + ":" + d.Disk.Source }
+func (c CertError) ID() any       { return c.Url }
+func (c CertExpiresSoon) ID() any { return c.Url }
+func (c CertOk) ID() any          { return c.Url }
+func (c ConfigReloaded) ID() any  { return "ConfigReloaded" }
+func (n NewNode) ID() any         { return n.Hostname }
+func (n NodeTimeout) ID() any     { return n.Hostname }
+func (n NodeInfo) ID() any        { return n.Hostname }
+
 func (DiskGettingFull) _info() {}
 func (DiskFineAgain) _info()   {}
 func (CertError) _info()       {}
 func (CertExpiresSoon) _info() {}
+func (CertOk) _info()          {}
 func (ConfigReloaded) _info()  {}
 func (NewNode) _info()         {}
 func (NodeTimeout) _info()     {}
@@ -146,6 +181,11 @@ func (DiskGettingFull) _important() {}
 func (CertError) _important()       {}
 func (CertExpiresSoon) _important() {}
 func (NodeTimeout) _important()     {}
+
+func (DiskGettingFull) _sticky() {}
+func (CertError) _sticky()       {}
+func (CertExpiresSoon) _sticky() {}
+func (NodeTimeout) _sticky()     {}
 
 // Bus Implementaiton
 
