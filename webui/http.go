@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"sync"
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
@@ -35,7 +36,7 @@ func sseSendData(w http.ResponseWriter, data any) {
 	}
 }
 
-func sseHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) notificationHandler(w http.ResponseWriter, r *http.Request) {
 	// http headers required for SSE
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -65,11 +66,12 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 					slog.Error("json encoding of WebUiMessage failed", "error", err, "webUiMessage", webUiMessage)
 					continue
 				}
+				s.addWebUiMessage(webUiMessage)
 				sseSendData(w, string(webUiMessageJson))
 
 				err = responseController.Flush()
 				if err != nil {
-					slog.Error("sseHandler() flushing response failed", "error", err)
+					slog.Error("notificationHandler() flushing response failed", "error", err)
 				}
 			}
 
@@ -88,13 +90,62 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type Server struct{}
+func (s *Server) unresolvedHandler(w http.ResponseWriter, _ *http.Request) {
+	slog.Info("XXX unresolvedHandler")
+	w.Header().Set("Content-Type", "application/json")
+	unresolved := make([]bus.WebUiMessage, 0)
+	for _, msg := range s.Unresolved {
+		slog.Info("XXX unresolvedHandler", "msg", msg)
+		unresolved = append(unresolved, *msg)
+	}
+	err := json.NewEncoder(w).Encode(unresolved)
+	if err != nil {
+		slog.Error("unresolvedHandler() json encoding failed", "error", err)
+	}
+}
 
-func (_ *Server) Init() error {
+type Server struct {
+	WebUiMessages []bus.WebUiMessage
+	Unresolved    []*bus.WebUiMessage
+	lock          sync.RWMutex
+}
+
+func (s *Server) addWebUiMessage(msg bus.WebUiMessage) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	s.WebUiMessages = append(s.WebUiMessages, msg)
+	if msg.IsCritical {
+		msgPtr := &s.WebUiMessages[len(s.WebUiMessages)-1]
+		s.Unresolved = append(s.Unresolved, msgPtr)
+		return
+	}
+
+	stillUnresolved := []*bus.WebUiMessage{}
+	for _, unresolvedMsg := range s.Unresolved {
+		if msg.Source == unresolvedMsg.Source {
+			// NodeInfo resolves NodeTimeout
+			if msg.SubSystemName == "node" && unresolvedMsg.SubSystemName == "heartbeat" {
+				continue
+			}
+			// DiskFineAgain resolves DiskGettingFull
+			if msg.SubSystemName == "diskmon" && unresolvedMsg.SubSystemName == "diskmon" {
+				continue
+			}
+			// TODO not yet implemented -> CertError
+			// TODO not yet implemented -> CertExpiresSoon
+		}
+		stillUnresolved = append(stillUnresolved, unresolvedMsg)
+	}
+	s.Unresolved = stillUnresolved
+}
+
+func (s *Server) Init() error {
 	address := config.Cfg.WebUiAddress
 
-	http.HandleFunc("/events", sseHandler)
+	http.HandleFunc("/notifications", s.notificationHandler)
 	http.HandleFunc("/static/", assetsFileHandler)
+	http.HandleFunc("/unresolved", s.unresolvedHandler)
 	http.HandleFunc("/", rootHandler)
 
 	go func() {

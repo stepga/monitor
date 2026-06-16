@@ -40,24 +40,24 @@ type CertExpiresSoon struct {
 
 // Reported when a node stopped reporting
 type NodeTimeout struct {
-	Hostname string
+	HostName string
 	LastSeen time.Time
 }
 
 // Reported when a new node started
 type NewNode struct {
-	Hostname string
+	HostName string
 }
 
 // Reported when a disk is full
 type DiskGettingFull struct {
-	Hostname string
+	HostName string
 	Disk     node.FileSystem
 }
 
 // Report when a disk is fine again
 type DiskFineAgain struct {
-	Hostname string
+	HostName string
 	Disk     node.FileSystem
 }
 
@@ -86,6 +86,7 @@ type WebUiMessage struct {
 	Summary       string
 	Report        string
 	IsCritical    bool
+	Source        string
 }
 
 // Bus Message interface implementations
@@ -107,11 +108,11 @@ func (info CertExpiresSoon) Report() string {
 }
 
 func (d DiskGettingFull) Report() string {
-	return fmt.Sprintf("Disk %s on %s is getting full: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
+	return fmt.Sprintf("Disk %s on %s is getting full: %s!", d.Disk.Source, d.HostName, d.Disk.Capacity)
 }
 
 func (d DiskFineAgain) Report() string {
-	return fmt.Sprintf("Disk %s on %s is is fine again: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
+	return fmt.Sprintf("Disk %s on %s is is fine again: %s!", d.Disk.Source, d.HostName, d.Disk.Capacity)
 }
 
 func (n NodeInfo) Report() string {
@@ -128,6 +129,7 @@ func (n NodeInfo) WebUiMessage() WebUiMessage {
 		Summary:       n.Oneline(),
 		Report:        n.Report(),
 		IsCritical:    false,
+		Source:        n.HostName,
 	}
 }
 
@@ -137,6 +139,7 @@ func (c CertError) WebUiMessage() WebUiMessage {
 		Summary:       "certificate expiration lookup failed",
 		Report:        c.Report(),
 		IsCritical:    true,
+		Source:        c.Url,
 	}
 }
 
@@ -146,6 +149,7 @@ func (c CertExpiresSoon) WebUiMessage() WebUiMessage {
 		Summary:       c.Report(),
 		Report:        "",
 		IsCritical:    true,
+		Source:        c.Url,
 	}
 }
 
@@ -155,6 +159,7 @@ func (n NodeTimeout) WebUiMessage() WebUiMessage {
 		Summary:       n.Oneline(),
 		Report:        "",
 		IsCritical:    true,
+		Source:        n.HostName,
 	}
 }
 
@@ -164,6 +169,7 @@ func (n NewNode) WebUiMessage() WebUiMessage {
 		Summary:       n.Oneline(),
 		Report:        "",
 		IsCritical:    false,
+		Source:        n.HostName,
 	}
 }
 
@@ -173,6 +179,7 @@ func (d DiskGettingFull) WebUiMessage() WebUiMessage {
 		Summary:       d.Oneline(),
 		Report:        "",
 		IsCritical:    true,
+		Source:        fmt.Sprintf("%s:%s", d.HostName, d.Disk.MountPoint),
 	}
 }
 
@@ -182,6 +189,7 @@ func (d DiskFineAgain) WebUiMessage() WebUiMessage {
 		Summary:       d.Oneline(),
 		Report:        "",
 		IsCritical:    false,
+		Source:        fmt.Sprintf("%s:%s", d.HostName, d.Disk.MountPoint),
 	}
 }
 
@@ -192,8 +200,8 @@ func (d DiskFineAgain) Oneline() string   { return d.Report() }
 func (c CertError) Oneline() string       { return c.Report() }
 func (c CertExpiresSoon) Oneline() string { return c.Report() }
 func (c ConfigReloaded) Oneline() string  { return "Configuration reloaded" }
-func (n NewNode) Oneline() string         { return fmt.Sprintf("New Node: %s", n.Hostname) }
-func (n NodeTimeout) Oneline() string     { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
+func (n NewNode) Oneline() string         { return fmt.Sprintf("New Node: %s", n.HostName) }
+func (n NodeTimeout) Oneline() string     { return fmt.Sprintf("NodeTimeout: %s", n.HostName) }
 func (n NodeInfo) Oneline() string        { return fmt.Sprintf("Node message from %s", n.HostName) }
 
 // Bus Implementaiton

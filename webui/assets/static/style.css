@@ -17,7 +17,7 @@ summary {
   list-style: none;
 }
 
-.content {
+.report {
   margin-top: 1rem;
 }
 
@@ -51,4 +51,12 @@ summary.critical::after {
   background: #FF3939;
   color: #ffffff;
   border: 2px solid #D20000;
+}
+
+p, label {
+  font: 1rem "Fira Sans", sans-serif;
+}
+
+input {
+  margin: 0.4rem;
 }
