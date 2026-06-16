@@ -15,3 +15,11 @@ details {
 details.important {
 	box-shadow: 2px 2px 2px red;
 }
+
+div.details {
+	margin-top: 1rem;
+}
+
+pre {
+    white-space: pre-wrap;
+}

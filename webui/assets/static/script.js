@@ -63,7 +63,9 @@ function createNotification(data) {
 	if (data['Details']) {
 		detail.insertAdjacentHTML('beforeend', `
 		<div class="details">
-			${data['Details']}
+			<pre>
+${JSON.stringify(JSON.parse(data['Details']), null, 2)}
+			</pre>
 		</div>`);
 	}
 
