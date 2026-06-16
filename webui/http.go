@@ -103,12 +103,12 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) unresolvedHandler(w http.ResponseWriter, _ *http.Request) {
-	slog.Info("XXX unresolvedHandler")
+func (s *Server) stickyHandler(w http.ResponseWriter, _ *http.Request) {
+	slog.Info("XXX stickyHandler")
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(store.FetchSticky())
 	if err != nil {
-		slog.Error("unresolvedHandler() json encoding failed", "error", err)
+		slog.Error("stickyHandler() json encoding failed", "error", err)
 	}
 }
 
@@ -119,7 +119,7 @@ func (s *Server) Init() error {
 
 	http.HandleFunc("/notifications", s.notificationHandler)
 	http.HandleFunc("/static/", assetsFileHandler)
-	http.HandleFunc("/unresolved", s.unresolvedHandler)
+	http.HandleFunc("/sticky", s.stickyHandler)
 	http.HandleFunc("/", rootHandler)
 
 	go func() {
