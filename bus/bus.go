@@ -96,6 +96,9 @@ type Rebooted struct {
 	Hostname string
 }
 
+// Reported when the list of sticky messages the store keeps changed
+type StickyListChanged struct{}
+
 // Bus messages interfaces and Reporting
 //
 // Any message that implements the Info interface will get reported,

@@ -26,6 +26,7 @@ func (r *Stdout) Init() error {
 			case string:
 				fmt.Printf("Bus msg '%s'\n", m)
 			case bus.CertInfo:
+			case bus.StickyListChanged:
 				// ignore
 			default:
 				fmt.Printf("stdout: Unknown message type: %T\n", msg)

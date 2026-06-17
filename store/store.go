@@ -20,15 +20,27 @@ func Start() {
 		ch := bus.Subscribe()
 		defer bus.Unsubscribe(ch)
 		for m := range ch {
+			changed := false
 			switch msg := m.(type) {
 			case bus.Sticky:
 				store.lock.Lock()
-				store.sticky[msg.Identifier()] = msg
+				_, exists := store.sticky[msg.Identifier()]
+				if !exists {
+					store.sticky[msg.Identifier()] = msg
+					changed = true
+				}
 				store.lock.Unlock()
 			case bus.Info:
 				store.lock.Lock()
-				delete(store.sticky, msg.Identifier())
+				_, exists := store.sticky[msg.Identifier()]
+				if exists {
+					delete(store.sticky, msg.Identifier())
+					changed = true
+				}
 				store.lock.Unlock()
+			}
+			if changed {
+				bus.Publish(bus.StickyListChanged{})
 			}
 		}
 	}()
