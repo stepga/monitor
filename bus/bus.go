@@ -162,15 +162,15 @@ func (n Rebooted) Summary() string {
 	return fmt.Sprintf("Node %s was rebooted", n.Hostname)
 }
 
-func (d DiskGettingFull) Identifier() any { return d.Hostname + ":" + d.Disk.Source }
-func (d DiskFineAgain) Identifier() any   { return d.Hostname + ":" + d.Disk.Source }
-func (c CertError) Identifier() any       { return c.Url }
-func (c CertExpiresSoon) Identifier() any { return c.Url }
-func (c CertOk) Identifier() any          { return c.Url }
+func (d DiskGettingFull) Identifier() any { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
+func (d DiskFineAgain) Identifier() any   { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
+func (c CertError) Identifier() any       { return "Cert:" + c.Url }
+func (c CertExpiresSoon) Identifier() any { return "Cert:" + c.Url }
+func (c CertOk) Identifier() any          { return "Cert:" + c.Url }
 func (c ConfigReloaded) Identifier() any  { return "ConfigReloaded" }
-func (n NewNode) Identifier() any         { return n.Hostname }
-func (n NodeTimeout) Identifier() any     { return n.Hostname }
-func (n NodeInfo) Identifier() any        { return n.Hostname }
+func (n NewNode) Identifier() any         { return "Node:" + n.Hostname }
+func (n NodeTimeout) Identifier() any     { return "Node:" + n.Hostname }
+func (n NodeInfo) Identifier() any        { return "Node:" + n.Hostname }
 func (n RebootRequired) Identifier() any  { return "Reboot:" + n.Hostname }
 func (n Rebooted) Identifier() any        { return "Reboot:" + n.Hostname }
 
