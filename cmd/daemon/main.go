@@ -24,6 +24,7 @@ var AvailableSubsystems = map[string]subsystems.Subsystem{
 	"heartbeat": &subsystems.Heartbeat{},
 	"diskmon":   &subsystems.Diskmon{},
 	"rebootmon": &subsystems.Rebootmon{},
+	"redmine":   &subsystems.Redmine{},
 }
 
 func main() {

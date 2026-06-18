@@ -54,6 +54,11 @@ type HeartbeatConfig struct {
 	CheckIntervalInMinutes time.Duration `json:"check_interval_in_minutes"`
 }
 
+type RedmineConfig struct {
+	Url     string `json:"url"`
+	IssueId string `json:"issue_id"`
+}
+
 type Config struct {
 	Subsystems    []string        `json:"subsystems"`
 	DiskThreshold float64         `json:"disk_threshold"`
@@ -61,4 +66,5 @@ type Config struct {
 	Listener      ListenerConfig  `json:"listener"`
 	WebUiAddress  string          `json:"webui_address"`
 	Heartbeat     HeartbeatConfig `json:"heartbeat"`
+	Redmine       RedmineConfig   `json:"redmine"`
 }
