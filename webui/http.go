@@ -105,15 +105,6 @@ func (s *Server) criticalHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func infoToWebUiMessage(info bus.Info) WebUiMessage {
-	var details string
-	details_bytes, err := json.Marshal(info)
-	if err == nil {
-		details = string(details_bytes)
-	} else {
-		slog.Error("json encoding of bus.Info failed", "error", err, "info", info)
-		details = fmt.Sprintf("%#v", info)
-	}
-
 	isCritical := false
 	if _, ok := info.(bus.Critical); ok {
 		isCritical = true
@@ -122,7 +113,7 @@ func infoToWebUiMessage(info bus.Info) WebUiMessage {
 	return WebUiMessage{
 		Summary:    info.Summary(),
 		IsCritical: isCritical,
-		Details:    details,
+		Details:    info.Details(),
 	}
 }
 

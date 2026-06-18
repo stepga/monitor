@@ -107,6 +107,7 @@ type CriticalListChanged struct{}
 type Info interface {
 	Summary() string
 	Identifier() any
+	Details() string
 }
 
 // Critical messages are alerts that stay active until a non-critical
@@ -159,6 +160,130 @@ func (n RebootRequired) Summary() string {
 }
 func (n Rebooted) Summary() string {
 	return fmt.Sprintf("Node %s was rebooted", n.Hostname)
+}
+
+func (d DiskGettingFull) Details() string {
+	return fmt.Sprintf(
+		`Hostname: %s
+Source: %s
+Mount point: %s
+Available bytes: %d
+Used bytes: %d
+Capacity: %s`,
+		d.Hostname,
+		d.Disk.Source,
+		d.Disk.MountPoint,
+		d.Disk.AvailableBytes,
+		d.Disk.UsedBytes,
+		d.Disk.Capacity,
+	)
+}
+
+func (d DiskFineAgain) Details() string {
+	return fmt.Sprintf(
+		`Hostname: %s
+Source: %s
+Mount point: %s
+Available bytes: %d
+Used bytes: %d
+Capacity: %s`,
+		d.Hostname,
+		d.Disk.Source,
+		d.Disk.MountPoint,
+		d.Disk.AvailableBytes,
+		d.Disk.UsedBytes,
+		d.Disk.Capacity,
+	)
+}
+
+func (c CertError) Details() string {
+	return fmt.Sprintf(
+		`Url: %s
+Error: %s`,
+		c.Url,
+		c.Error,
+	)
+}
+
+func (c CertExpiresSoon) Details() string {
+	return fmt.Sprintf(
+		`Url: %s
+Valid until: %s
+Remaining: %d days`,
+		c.Url,
+		c.Expiry.Format(time.DateTime),
+		int(c.Remaining.Hours()/24.0),
+	)
+}
+
+func (c CertOk) Details() string {
+	return fmt.Sprintf(
+		`Url: %s
+Valid until: %s
+Remaining: %d days`,
+		c.Url,
+		c.Expiry.Format(time.DateTime),
+		int(c.Remaining.Hours()/24.0),
+	)
+}
+
+func (n NewNode) Details() string {
+	return fmt.Sprintf(
+		`Hostname: %s`,
+		n.Hostname,
+	)
+}
+
+func (n NodeTimeout) Details() string {
+	return fmt.Sprintf(
+		`Hostname: %s
+Last Seen: %s`,
+		n.Hostname,
+		n.LastSeen.Format(time.DateTime),
+	)
+}
+
+func (n NodeInfo) Details() string {
+	str := fmt.Sprintf(
+		`Hostname: %s
+Operating System: %s
+Operating System Version: %s
+Reboot required: %t`,
+		n.Hostname,
+		n.OperatingSystemName,
+		n.OperatingSystemVersion,
+		n.RebootRequired,
+	)
+	for _, fs := range n.FileSystems {
+		str = str + fmt.Sprintf(
+			`
+  %s
+    Capacity: %s
+    Source: %s
+    Available Bytes: %d
+    Used Bytes: %d`,
+			fs.MountPoint,
+			fs.Capacity,
+			fs.Source,
+			fs.AvailableBytes,
+			fs.UsedBytes,
+		)
+	}
+	return str
+}
+
+func (n RebootRequired) Details() string {
+	return fmt.Sprintf(
+		`Hostname: %s`,
+		n.Hostname,
+	)
+}
+
+func (n Rebooted) Details() string {
+	return fmt.Sprintf(
+		`Hostname: %s`,
+		n.Hostname,
+	)
 }
 
 func (d DiskGettingFull) Identifier() any { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }

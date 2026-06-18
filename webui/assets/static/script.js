@@ -60,14 +60,12 @@ function createNotification(data) {
 	`;
 	detail.style.display = verboseDetailsShown ? "block" : "none";
 	detail.className = data['IsCritical'] ? "critical" : "";
-	if (data['Details']) {
-		detail.insertAdjacentHTML('beforeend', `
-		<div class="details">
-			<pre>
-${JSON.stringify(JSON.parse(data['Details']), null, 2)}
-			</pre>
-		</div>`);
-	}
+	detail.insertAdjacentHTML('beforeend', `
+	<div class="details">
+		<pre>
+${data['Details']}
+		</pre>
+	</div>`);
 
 	return detail;
 }
