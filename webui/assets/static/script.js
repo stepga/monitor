@@ -1,4 +1,30 @@
-var verboseDetailsShown = false;
+function getStorage(key) {
+	switch(key) {
+		case "verbose":
+			return sessionStorage.getItem(key) === 'true';
+		default:
+			console.error("unknown variable name: " + key)
+	}
+}
+
+function setStorage(key, val) {
+	switch(key) {
+		case "verbose":
+			return sessionStorage.setItem('verbose', val === true)
+		default:
+			console.error("unknown variable name: " + key)
+	}
+}
+
+function displayVerboseDiv(doDisplay) {
+	const verboseDiv = document.getElementById("verbose");
+	verboseDiv.style.display = doDisplay ? "block" : "none";
+}
+
+function verboseCheckboxOnChange(event) {
+	setStorage("verbose", event.target.checked);
+	displayVerboseDiv(event.target.checked);
+}
 
 function setNotificationsCritical() {
 	const criticalDiv = document.getElementById("critical");
@@ -20,12 +46,6 @@ function setNotificationsCritical() {
 		});
 }
 
-function toggleVerboseOnChange(event) {
-	verboseDetailsShown = event.target.checked;
-	const verboseDiv = document.getElementById("verbose");
-	verboseDiv.style.display = this.checked ? "block" : "none";
-}
-
 document.addEventListener("DOMContentLoaded", function(){
 	const eventSource = new EventSource("/notifications");
 	window.addEventListener('beforeunload', () => {
@@ -34,10 +54,13 @@ document.addEventListener("DOMContentLoaded", function(){
 		eventSource.close();
 	});
 
-	const toggleVerboseCheckbox = document.getElementById("toggleVerbose");
-	toggleVerboseCheckbox.addEventListener("change", toggleVerboseOnChange);
+	const verboseCheckbox = document.getElementById("verboseCheckbox");
+	verboseCheckbox.addEventListener("change", verboseCheckboxOnChange);
+	verboseCheckbox.checked = getStorage("verbose");
 
 	const verboseDiv = document.getElementById("verbose");
+	displayVerboseDiv(getStorage("verbose"));
+
 	eventSource.onmessage = (event) => {
 		try {
 			const data = JSON.parse(event.data);
