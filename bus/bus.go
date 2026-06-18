@@ -106,7 +106,7 @@ type CriticalListChanged struct{}
 
 type Info interface {
 	Summary() string
-	Identifier() any
+	Identifier() string
 	Details() string
 }
 
@@ -286,16 +286,16 @@ func (n Rebooted) Details() string {
 	)
 }
 
-func (d DiskGettingFull) Identifier() any { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
-func (d DiskFineAgain) Identifier() any   { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
-func (c CertError) Identifier() any       { return "Cert:" + c.Url }
-func (c CertExpiresSoon) Identifier() any { return "Cert:" + c.Url }
-func (c CertOk) Identifier() any          { return "Cert:" + c.Url }
-func (n NewNode) Identifier() any         { return "Node:" + n.Hostname }
-func (n NodeTimeout) Identifier() any     { return "Node:" + n.Hostname }
-func (n NodeInfo) Identifier() any        { return "Node:" + n.Hostname }
-func (n RebootRequired) Identifier() any  { return "Reboot:" + n.Hostname }
-func (n Rebooted) Identifier() any        { return "Reboot:" + n.Hostname }
+func (d DiskGettingFull) Identifier() string { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
+func (d DiskFineAgain) Identifier() string   { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
+func (c CertError) Identifier() string       { return "Cert:" + c.Url }
+func (c CertExpiresSoon) Identifier() string { return "Cert:" + c.Url }
+func (c CertOk) Identifier() string          { return "Cert:" + c.Url }
+func (n NewNode) Identifier() string         { return "Node:" + n.Hostname }
+func (n NodeTimeout) Identifier() string     { return "Node:" + n.Hostname }
+func (n NodeInfo) Identifier() string        { return "Node:" + n.Hostname }
+func (n RebootRequired) Identifier() string  { return "Reboot:" + n.Hostname }
+func (n Rebooted) Identifier() string        { return "Reboot:" + n.Hostname }
 
 func (DiskGettingFull) _critical() {}
 func (CertError) _critical()       {}
