@@ -14,9 +14,8 @@ import (
 
 // Report format for WebUI messages sent from daemon to browser
 type WebUiMessage struct {
-	Summary    string
-	IsCritical bool
-	Details    string
+	Summary string
+	Details string
 }
 
 //go:embed assets/*
@@ -105,15 +104,9 @@ func (s *Server) criticalHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func infoToWebUiMessage(info bus.Info) WebUiMessage {
-	isCritical := false
-	if _, ok := info.(bus.Critical); ok {
-		isCritical = true
-	}
-
 	return WebUiMessage{
-		Summary:    info.Summary(),
-		IsCritical: isCritical,
-		Details:    info.Details(),
+		Summary: info.Summary(),
+		Details: info.Details(),
 	}
 }
 
