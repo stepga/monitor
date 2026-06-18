@@ -103,17 +103,10 @@ type CriticalListChanged struct{}
 //
 // Any message that implements the Info interface will get reported,
 // e.g. displayed on the gui, or written to a log file.
-//
-
-type Summary interface {
-	// Single line string describing the message
-	Summary() string
-}
 
 type Info interface {
-	Summary
+	Summary() string
 	Identifier() any
-	_info()
 }
 
 // Critical messages are alerts that stay active until a non-critical
@@ -180,18 +173,6 @@ func (n NodeTimeout) Identifier() any     { return n.Hostname }
 func (n NodeInfo) Identifier() any        { return n.Hostname }
 func (n RebootRequired) Identifier() any  { return "Reboot:" + n.Hostname }
 func (n Rebooted) Identifier() any        { return "Reboot:" + n.Hostname }
-
-func (DiskGettingFull) _info() {}
-func (DiskFineAgain) _info()   {}
-func (CertError) _info()       {}
-func (CertExpiresSoon) _info() {}
-func (CertOk) _info()          {}
-func (ConfigReloaded) _info()  {}
-func (NewNode) _info()         {}
-func (NodeTimeout) _info()     {}
-func (NodeInfo) _info()        {}
-func (RebootRequired) _info()  {}
-func (Rebooted) _info()        {}
 
 func (DiskGettingFull) _critical() {}
 func (CertError) _critical()       {}
