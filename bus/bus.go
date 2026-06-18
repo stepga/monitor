@@ -96,16 +96,14 @@ type Rebooted struct {
 	Hostname string
 }
 
-// Reported when the list of sticky messages the store keeps changed
-type StickyListChanged struct{}
+// Reported when the list of critical messages in store/store.go changes
+type CriticalListChanged struct{}
 
 // Bus messages interfaces and Reporting
 //
 // Any message that implements the Info interface will get reported,
 // e.g. displayed on the gui, or written to a log file.
-// A message can also implement the Important interface, which should
-// be used for messages that require attention, e.g. a disk is getting
-// full or a certificate is nearing end of life.
+//
 
 type Summary interface {
 	// Single line string describing the message
@@ -118,16 +116,11 @@ type Info interface {
 	_info()
 }
 
-// Sticky messages are alerts that stay active until a non-sticky
-// message with the same Identifier is published which clears it again.
-type Sticky interface {
+// Critical messages are alerts that stay active until a non-critical
+// message with the same Identifier is published and clears it again.
+type Critical interface {
 	Info
-	_sticky()
-}
-
-type Important interface {
-	Info
-	_important()
+	_critical()
 }
 
 // Bus Message interface implementations
@@ -200,17 +193,11 @@ func (NodeInfo) _info()        {}
 func (RebootRequired) _info()  {}
 func (Rebooted) _info()        {}
 
-func (DiskGettingFull) _important() {}
-func (CertError) _important()       {}
-func (CertExpiresSoon) _important() {}
-func (NodeTimeout) _important()     {}
-func (RebootRequired) _important()  {}
-
-func (DiskGettingFull) _sticky() {}
-func (CertError) _sticky()       {}
-func (CertExpiresSoon) _sticky() {}
-func (NodeTimeout) _sticky()     {}
-func (RebootRequired) _sticky()  {}
+func (DiskGettingFull) _critical() {}
+func (CertError) _critical()       {}
+func (CertExpiresSoon) _critical() {}
+func (NodeTimeout) _critical()     {}
+func (RebootRequired) _critical()  {}
 
 // Bus Implementaiton
 

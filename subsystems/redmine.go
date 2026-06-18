@@ -20,8 +20,8 @@ type Redmine struct {
 func (r *Redmine) updateIssue() {
 	var body []byte
 	var err error
-	sticky := store.FetchSticky()
-	if len(sticky) == 0 {
+	critical := store.FetchCritical()
+	if len(critical) == 0 {
 		body, err = json.Marshal(map[string]any{
 			"issue": map[string]any{
 				"status_id":      "3", // Resolved
@@ -32,7 +32,7 @@ func (r *Redmine) updateIssue() {
 	} else {
 		var description []string
 
-		for _, msg := range sticky {
+		for _, msg := range critical {
 			description = append(description, msg.Summary())
 		}
 
@@ -86,7 +86,7 @@ func (r *Redmine) Init() error {
 		defer bus.Unsubscribe(ch)
 		for m := range ch {
 			switch m.(type) {
-			case bus.StickyListChanged:
+			case bus.CriticalListChanged:
 				go r.updateIssue()
 			}
 		}

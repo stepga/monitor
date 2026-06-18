@@ -7,12 +7,12 @@ import (
 )
 
 type Store struct {
-	sticky map[any]bus.Info
-	lock   sync.RWMutex
+	critical map[any]bus.Info
+	lock     sync.RWMutex
 }
 
 var store = &Store{
-	sticky: make(map[any]bus.Info),
+	critical: make(map[any]bus.Info),
 }
 
 func Start() {
@@ -22,35 +22,35 @@ func Start() {
 		for m := range ch {
 			changed := false
 			switch msg := m.(type) {
-			case bus.Sticky:
+			case bus.Critical:
 				store.lock.Lock()
-				_, exists := store.sticky[msg.Identifier()]
+				_, exists := store.critical[msg.Identifier()]
 				if !exists {
-					store.sticky[msg.Identifier()] = msg
+					store.critical[msg.Identifier()] = msg
 					changed = true
 				}
 				store.lock.Unlock()
 			case bus.Info:
 				store.lock.Lock()
-				_, exists := store.sticky[msg.Identifier()]
+				_, exists := store.critical[msg.Identifier()]
 				if exists {
-					delete(store.sticky, msg.Identifier())
+					delete(store.critical, msg.Identifier())
 					changed = true
 				}
 				store.lock.Unlock()
 			}
 			if changed {
-				bus.Publish(bus.StickyListChanged{})
+				bus.Publish(bus.CriticalListChanged{})
 			}
 		}
 	}()
 }
 
-func FetchSticky() []bus.Info {
-	ret := make([]bus.Info, 0, len(store.sticky))
+func FetchCritical() []bus.Info {
+	ret := make([]bus.Info, 0, len(store.critical))
 
 	store.lock.RLock()
-	for _, v := range store.sticky {
+	for _, v := range store.critical {
 		ret = append(ret, v)
 	}
 	store.lock.RUnlock()

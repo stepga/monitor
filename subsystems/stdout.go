@@ -15,7 +15,7 @@ func (r *Stdout) Init() error {
 		_, noColor := os.LookupEnv("NO_COLOR")
 		for msg := range ch {
 			switch m := msg.(type) {
-			case bus.Important:
+			case bus.Critical:
 				if noColor {
 					fmt.Printf("IMPORTANT: %s\n", m.Summary())
 				} else {
@@ -26,7 +26,7 @@ func (r *Stdout) Init() error {
 			case string:
 				fmt.Printf("Bus msg '%s'\n", m)
 			case bus.CertInfo:
-			case bus.StickyListChanged:
+			case bus.CriticalListChanged:
 				// ignore
 			default:
 				fmt.Printf("stdout: Unknown message type: %T\n", msg)

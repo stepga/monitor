@@ -12,7 +12,7 @@ details {
 	word-wrap: break-word
 }
 
-details.important {
+details.critical {
 	box-shadow: 2px 2px 2px red;
 }
 

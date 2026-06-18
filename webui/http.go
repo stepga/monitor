@@ -14,9 +14,9 @@ import (
 
 // Report format for WebUI messages sent from daemon to browser
 type WebUiMessage struct {
-	Summary     string
-	IsImportant bool
-	Details     string
+	Summary    string
+	IsCritical bool
+	Details    string
 }
 
 //go:embed assets/*
@@ -92,15 +92,15 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) stickyHandler(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) criticalHandler(w http.ResponseWriter, _ *http.Request) {
 	var messages []WebUiMessage
 	w.Header().Set("Content-Type", "application/json")
-	for _, sticky := range store.FetchSticky() {
-		messages = append(messages, infoToWebUiMessage(sticky))
+	for _, critical := range store.FetchCritical() {
+		messages = append(messages, infoToWebUiMessage(critical))
 	}
 	err := json.NewEncoder(w).Encode(messages)
 	if err != nil {
-		slog.Error("stickyHandler() json encoding failed", "error", err)
+		slog.Error("criticalHandler() json encoding failed", "error", err)
 	}
 }
 
@@ -110,19 +110,19 @@ func infoToWebUiMessage(info bus.Info) WebUiMessage {
 	if err == nil {
 		details = string(details_bytes)
 	} else {
-		slog.Error("json encoding of sticky/bus.Info failed", "error", err, "sticky", info)
+		slog.Error("json encoding of bus.Info failed", "error", err, "info", info)
 		details = fmt.Sprintf("%#v", info)
 	}
 
-	isImportant := false
-	if _, ok := info.(bus.Important); ok {
-		isImportant = true
+	isCritical := false
+	if _, ok := info.(bus.Critical); ok {
+		isCritical = true
 	}
 
 	return WebUiMessage{
-		Summary:     info.Summary(),
-		IsImportant: isImportant,
-		Details:     details,
+		Summary:    info.Summary(),
+		IsCritical: isCritical,
+		Details:    details,
 	}
 }
 
@@ -133,7 +133,7 @@ func (s *Server) Init() error {
 
 	http.HandleFunc("/notifications", s.notificationHandler)
 	http.HandleFunc("/static/", assetsFileHandler)
-	http.HandleFunc("/sticky", s.stickyHandler)
+	http.HandleFunc("/critical", s.criticalHandler)
 	http.HandleFunc("/", rootHandler)
 
 	go func() {

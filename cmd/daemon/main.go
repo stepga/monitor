@@ -62,13 +62,13 @@ func main() {
 		}
 	}()
 
-	dumpStickySignal := make(chan os.Signal, 1)
-	signal.Notify(dumpStickySignal, syscall.SIGUSR2)
+	dumpCriticalSignal := make(chan os.Signal, 1)
+	signal.Notify(dumpCriticalSignal, syscall.SIGUSR2)
 	go func() {
 		for {
-			<-dumpStickySignal
-			fmt.Println("Sticky Messages:")
-			for _, msg := range store.FetchSticky() {
+			<-dumpCriticalSignal
+			fmt.Println("Dump Critical Messages (due to SIGUSR2):")
+			for _, msg := range store.FetchCritical() {
 				fmt.Printf("  %s\n", msg.Summary())
 			}
 		}

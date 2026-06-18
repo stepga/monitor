@@ -1,18 +1,18 @@
 var verboseDetailsShown = true;
 
-function setNotificationsSticky() {
-	const notificationsSticky = document.getElementById("notifications_sticky");
-	fetch("/sticky")
+function setNotificationsCritical() {
+	const notificationsCritical = document.getElementById("notifications_critical");
+	fetch("/critical")
 		.then(response => response.json())
 		.then(data => {
-			notificationsSticky.innerHTML = "";
+			notificationsCritical.innerHTML = "";
 			for (var i = 0; i < data.length ; i++) {
 				notification = createNotification(data[i]);
-				notificationsSticky.prepend(notification);
+				notificationsCritical.prepend(notification);
 			}
 		})
 		.catch(error => {
-			console.error('failed to fetch sticky: ' + error);
+			console.error('failed to fetch critical: ' + error);
 		});
 }
 
@@ -34,17 +34,17 @@ document.addEventListener("DOMContentLoaded", function(){
 	eventSource.onmessage = (event) => {
 		try {
 			const data = JSON.parse(event.data);
-			// enforce `data['IsImportant'] = false` for notifications in the verbose log
-			data['IsImportant'] = false;
+			// enforce `data['IsCritical'] = false` for notifications in the verbose log
+			data['IsCritical'] = false;
 			const notification = createNotification(data);
 			notificationsVerbose.prepend(notification);
-			setNotificationsSticky()
+			setNotificationsCritical()
 		} catch (error) {
 			console.error('Failed to parse JSON in event:', error.message);
 		}
 	};
 
-	setNotificationsSticky();
+	setNotificationsCritical();
 });
 
 function createNotification(data) {
@@ -59,7 +59,7 @@ function createNotification(data) {
 		</summary>
 	`;
 	detail.style.display = verboseDetailsShown ? "block" : "none";
-	detail.className = data['IsImportant'] ? "important" : "";
+	detail.className = data['IsCritical'] ? "critical" : "";
 	if (data['Details']) {
 		detail.insertAdjacentHTML('beforeend', `
 		<div class="details">
