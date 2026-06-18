@@ -10,16 +10,14 @@
 
 	<body>
 		<h1>Critical Notifications</h1>
-		<div id="notifications_critical">
-		</div>
-
-		<br>
 		<div>
-			<input type="checkbox" id="verbose" name="verbose" checked />
-			<label for="verbose">Show Live Notification Log</label>
+			<input type="checkbox" id="toggleVerbose" name="toggleVerbose"/>
+			<label for="toggleVerbose">Show Live Notification Log</label>
 		</div>
 
-		<div id="notifications_verbose">
+		<div class="container">
+			<div class="left" id="critical"></div>
+			<div class="right" id="verbose"></div>
 		</div>
 
 	</body>

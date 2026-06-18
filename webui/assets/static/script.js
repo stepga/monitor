@@ -1,19 +1,29 @@
-var verboseDetailsShown = true;
+var verboseDetailsShown = false;
 
 function setNotificationsCritical() {
-	const notificationsCritical = document.getElementById("notifications_critical");
+	const criticalDiv = document.getElementById("critical");
 	fetch("/critical")
 		.then(response => response.json())
 		.then(data => {
-			notificationsCritical.innerHTML = "";
+			if (data == null || !("length" in data)) {
+				console.error("received invalid data: " + data);
+				return
+			}
+			criticalDiv.innerHTML = "";
 			for (var i = 0; i < data.length ; i++) {
-				notification = createNotification(data[i]);
-				notificationsCritical.prepend(notification);
+				var notification = createNotification(data[i]);
+				criticalDiv.prepend(notification);
 			}
 		})
 		.catch(error => {
-			console.error('failed to fetch critical: ' + error);
+			console.error("failed to fetch '/critical': "+ error);
 		});
+}
+
+function toggleVerboseOnChange(event) {
+	verboseDetailsShown = event.target.checked;
+	const verboseDiv = document.getElementById("verbose");
+	verboseDiv.style.display = this.checked ? "block" : "none";
 }
 
 document.addEventListener("DOMContentLoaded", function(){
@@ -24,23 +34,18 @@ document.addEventListener("DOMContentLoaded", function(){
 		eventSource.close();
 	});
 
-	const verboseCheckbox = document.getElementById("verbose");
-	const notificationsVerbose = document.getElementById("notifications_verbose");
-	verboseCheckbox.addEventListener("change", function() {
-		verboseDetailsShown = this.checked;
-		notificationsVerbose.style.display = this.checked ? "block" : "none";
-	});
+	const toggleVerboseCheckbox = document.getElementById("toggleVerbose");
+	toggleVerboseCheckbox.addEventListener("change", toggleVerboseOnChange);
 
+	const verboseDiv = document.getElementById("verbose");
 	eventSource.onmessage = (event) => {
 		try {
 			const data = JSON.parse(event.data);
-			// enforce `data['IsCritical'] = false` for notifications in the verbose log
-			data['IsCritical'] = false;
 			const notification = createNotification(data);
-			notificationsVerbose.prepend(notification);
+			verboseDiv.prepend(notification);
 			setNotificationsCritical()
 		} catch (error) {
-			console.error('Failed to parse JSON in event:', error.message);
+			console.error('failed to handle message: ', error.message);
 		}
 	};
 
@@ -58,8 +63,7 @@ function createNotification(data) {
 			<span>${data['Summary']}</span>
 		</summary>
 	`;
-	detail.style.display = verboseDetailsShown ? "block" : "none";
-	detail.className = data['IsCritical'] ? "critical" : "";
+
 	detail.insertAdjacentHTML('beforeend', `
 	<div class="details">
 		<pre>
