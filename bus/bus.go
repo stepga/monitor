@@ -221,8 +221,8 @@ func (b *Bus) publish(msg any) {
 	for ch := range b.subscribers {
 		select {
 		case ch <- msg:
-		default:
-			fmt.Printf("Could not deliver msg\n")
+		case <-time.After(5 * time.Second):
+			fmt.Printf("Error: Could not deliver msg\n")
 		}
 	}
 }
