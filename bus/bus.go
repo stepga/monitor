@@ -119,7 +119,7 @@ type Critical interface {
 // Bus Message interface implementations
 
 func (info CertError) Summary() string {
-	return fmt.Sprintf("%s: %s",
+	return fmt.Sprintf("Could not get cert from '%s': %s",
 		info.Url,
 		info.Error,
 	)
@@ -127,34 +127,34 @@ func (info CertError) Summary() string {
 
 func (info CertExpiresSoon) Summary() string {
 	return fmt.Sprintf(
-		"%s: expires soon, %v remaining, expires at %s",
+		"Certificate of '%s' expires soon, %d days remaining, expires at %s",
 		info.Url,
-		info.Remaining,
-		info.Expiry.Format(time.UnixDate),
+		int(info.Remaining.Hours()/24.0),
+		info.Expiry.Format(time.DateTime),
 	)
 }
 
 func (info CertOk) Summary() string {
 	return fmt.Sprintf(
-		"%s: ok, %v remaining, expires at %s",
+		"Certificate of '%s' is ok, %d days remaining, expires at %s",
 		info.Url,
-		info.Remaining,
-		info.Expiry.Format(time.UnixDate),
+		int(info.Remaining.Hours()/24.0),
+		info.Expiry.Format(time.DateTime),
 	)
 }
 
 func (d DiskGettingFull) Summary() string {
-	return fmt.Sprintf("Disk %s on %s is getting full: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
+	return fmt.Sprintf("Disk %s on %s is getting full: %s", d.Disk.Source, d.Hostname, d.Disk.Capacity)
 }
 
 func (d DiskFineAgain) Summary() string {
-	return fmt.Sprintf("Disk %s on %s is is fine again: %s!", d.Disk.Source, d.Hostname, d.Disk.Capacity)
+	return fmt.Sprintf("Disk %s on %s is is fine again: %s", d.Disk.Source, d.Hostname, d.Disk.Capacity)
 }
 
 func (ConfigReloaded) Summary() string { return "Configuration reloaded" }
-func (n NewNode) Summary() string      { return fmt.Sprintf("New Node: %s", n.Hostname) }
-func (n NodeTimeout) Summary() string  { return fmt.Sprintf("NodeTimeout: %s", n.Hostname) }
-func (n NodeInfo) Summary() string     { return fmt.Sprintf("Node message from %s", n.Hostname) }
+func (n NewNode) Summary() string      { return fmt.Sprintf("New Node connected: %s", n.Hostname) }
+func (n NodeTimeout) Summary() string  { return fmt.Sprintf("Node %s timed out", n.Hostname) }
+func (n NodeInfo) Summary() string     { return fmt.Sprintf("Received message from node %s", n.Hostname) }
 func (n RebootRequired) Summary() string {
 	return fmt.Sprintf("Node %s needs to be rebooted", n.Hostname)
 }
