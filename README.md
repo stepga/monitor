@@ -4,7 +4,7 @@ Basic monitoring system with multiple nodes.
 
 ## TODOs
 
-* Report(): make format consistent (json?)
+* Info(): make format consistent (json?)
 * webui: do not log -vvv into the website
   * parse json in frontend and print only some/partial reports
   * do not send all reports to website?
@@ -21,13 +21,6 @@ Nodes:
 Daemon:
 - listens continuously for new node messages
 - sends reports to configured "reporters" if something needs attention
-
-Reporter:
-a daemon "output plugin" which sends the information (e.g. mail, redmine posts).
-
-Collector:
-a daemon "input plugin" which reads new information, e.g. node information via
-"listener collector", or certificate expiry dates via "cert collector".
 
 ## Features
 
@@ -82,10 +75,10 @@ To allow a dynamic configuration of different reportings or data
 collections the daemon is split up into subsystems (TODO better
 name?). On startup the daemon loads a configuration file which is
 globally available as `Cfg` (see `config/config.go`). It then starts
-up all configured subsystems. For all available subsystems, see
-`AvailableSubsystems` in `cmd/daemon/main.go`. The subsystem interface
-is straight forward, it only defines a single method called `Init`
-(see `subsystems/subsystem.go`) which should start its goroutines and
+up all configured subsystems. For a list of all available subsystems
+see `AvailableSubsystems` in `cmd/daemon/main.go`. The subsystem
+interface requires only a single Init method (`Init() error`) (see
+`subsystems/subsystem.go`) which should start its goroutines and
 return.
 Subsystems talk to each other through a global bus (see `bus/bus.go`).
 Some subsystems only generate messages (e.g. `subsystem/cert.go` or
@@ -115,7 +108,8 @@ messages (e.g. `subsystem/stdout.go`). They might also do both.
                  │ Unsubscribe(chan) │
                  └───────────────────┘
 ```
-Anything can publish messages on the bus, they will get delivered to
+
+Anything can publish messages on the bus which will get delivered to
 everyone that subscribed.
 
 ## Example subsystems
@@ -149,10 +143,10 @@ func (_ *DiskUsageReporter) Init() error {
 }
 ```
 
-These events could now be tracked by a tracker, that sends errors if a
-disk has a usage over 80% (here `DiskGettingFull`) and sends an ok
-message (here `DiskFineAgain`) if the disk is below the threshold
-again:
+These events can now be tracked by another subsystem that sends
+errors if a disk has a usage over 80% (here `DiskGettingFull`) or
+sends an ok message (here `DiskFineAgain`) if the disk is below the
+threshold again:
 
 ```go
 type DiskUsageTracker struct{}
@@ -199,8 +193,8 @@ func (_ *DiskUsageTracker) Init() error {
 }
 ```
 
-Now we could implement a third subsystem, that simply reports all disk
-messages reported by the tracker by printing them on stdout:
+Now we could implement a third subsystem that simply reports all disk
+threshold messages by printing them on stdout:
 
 
 ```go
@@ -213,7 +207,7 @@ func (_ *StdoutReporter) Init() error {
 		for m := range ch {
 			switch msg := m.(type) {
 			case DiskGettingFull:
-				fmt.Printf("Warning, disk %s is getting full: %d%%!\n", msg.Path, msg.Usage)
+				fmt.Printf("Warning: disk %s is getting full: %d%%!\n", msg.Path, msg.Usage)
 			case DiskFineAgain:
 				fmt.Printf("Disk %s is fine again: %d%%.\n", msg.Path, msg.Usage)
 			}
@@ -236,7 +230,8 @@ var AvailableSubsystems = map[string]subsystems.Subsystem{
 }
 ```
 
-And add them to the `subsystems` in your `config.json`:
+And add them to the `subsystems` array in your `config.json`:
+
 ```json
    "subsystems": ["DiskUsageReporter", "DiskUsageTracker", "StdoutReporter"],
 ```
@@ -245,15 +240,18 @@ And add them to the `subsystems` in your `config.json`:
 
 There are all kinds of messages on the bus, some are just for
 communication between two subsystems, some might be interesting for
-the user and some are important messages that should notify the user.
-Besides multiple subsystems that generated information like the node
-listener or the certificate check, there might also be multiple
-subsystems that report messages to the user, e.g. the stdout reporter
-or the pushover subsystem that sends notifications. These must be able
-to figure out which messages should get reportet. To avoid a big
-switch case in every reporter that filters for the relevant messages,
-all relevant messages implement the Info Interface and important
-messages also implement the Important interface (see `bus/bus.go`).
+the user and some are important messages that should send a
+notification to the user.
+Besides multiple subsystems that generate information like the node
+listener or the certificate check, there might also be
+subsystems that report messages to the user, e.g. the stdout or the
+pushover subsystem that sends notifications.
+They cant just print out any message they receive from the bus, since
+not all messages are relevant. Thats why there are multiple
+interfaces for them to be able to figure out which messages should get
+reportet. Any message that is relevant for the user implements the
+Info interface (see `bus/bus.go`). Messages with a higher importance
+also implement the Important interace.
 This way a new subystem can report new messages that should get
 reportet without having to update all reporting subsystems.
 Having two interfaces allows for filtering, e.g. the pushover
