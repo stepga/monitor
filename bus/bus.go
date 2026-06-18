@@ -151,10 +151,9 @@ func (d DiskFineAgain) Summary() string {
 	return fmt.Sprintf("Disk %s on %s is is fine again: %s", d.Disk.Source, d.Hostname, d.Disk.Capacity)
 }
 
-func (ConfigReloaded) Summary() string { return "Configuration reloaded" }
-func (n NewNode) Summary() string      { return fmt.Sprintf("New Node connected: %s", n.Hostname) }
-func (n NodeTimeout) Summary() string  { return fmt.Sprintf("Node %s timed out", n.Hostname) }
-func (n NodeInfo) Summary() string     { return fmt.Sprintf("Received message from node %s", n.Hostname) }
+func (n NewNode) Summary() string     { return fmt.Sprintf("New Node connected: %s", n.Hostname) }
+func (n NodeTimeout) Summary() string { return fmt.Sprintf("Node %s timed out", n.Hostname) }
+func (n NodeInfo) Summary() string    { return fmt.Sprintf("Received message from node %s", n.Hostname) }
 func (n RebootRequired) Summary() string {
 	return fmt.Sprintf("Node %s needs to be rebooted", n.Hostname)
 }
@@ -167,7 +166,6 @@ func (d DiskFineAgain) Identifier() any   { return "DiskUsage:" + d.Hostname + "
 func (c CertError) Identifier() any       { return "Cert:" + c.Url }
 func (c CertExpiresSoon) Identifier() any { return "Cert:" + c.Url }
 func (c CertOk) Identifier() any          { return "Cert:" + c.Url }
-func (c ConfigReloaded) Identifier() any  { return "ConfigReloaded" }
 func (n NewNode) Identifier() any         { return "Node:" + n.Hostname }
 func (n NodeTimeout) Identifier() any     { return "Node:" + n.Hostname }
 func (n NodeInfo) Identifier() any        { return "Node:" + n.Hostname }
