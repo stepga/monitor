@@ -32,7 +32,7 @@ func (p *Pushover) sendMessage(title, message string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("pushover returned status %s", resp.Status)
+		fmt.Printf("pushover: non ok response status: %s\n", resp.Status)
 	}
 
 	return nil

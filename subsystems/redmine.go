@@ -45,7 +45,7 @@ func (r *Redmine) updateIssue() {
 	}
 
 	if err != nil {
-		fmt.Printf("Error: redmine: %s\n", err)
+		fmt.Printf("redmine: json marshall failed: %s\n", err)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (r *Redmine) updateIssue() {
 
 	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Printf("Error: redmine: %s\n", err)
+		fmt.Printf("redmine: creating request failed: %s\n", err)
 		return
 	}
 
@@ -65,13 +65,13 @@ func (r *Redmine) updateIssue() {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("Error: redmine: %s\n", err)
+		fmt.Printf("redmine: request failed: %s\n", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if (resp.StatusCode != http.StatusOK) && (resp.StatusCode != http.StatusNoContent) {
-		fmt.Printf("Error: redmine: put returned status %s\n", resp.Status)
+		fmt.Printf("redmine: put returned status %s\n", resp.Status)
 		return
 	}
 }

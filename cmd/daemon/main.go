@@ -56,7 +56,7 @@ func main() {
 			<-reloadSignal
 			err := config.LoadConfig(*configFile)
 			if err != nil {
-				fmt.Printf("Failed to relaod config: %s", err)
+				fmt.Printf("Failed to reload config: %s\n", err)
 			}
 			bus.Publish(bus.ConfigReloaded{})
 		}
