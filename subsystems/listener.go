@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"net"
 
 	"github.com/stepga/monitor/bus"
@@ -23,20 +22,18 @@ func decodeNodeInfo(conn net.Conn) {
 
 	data, err := io.ReadAll(limited)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("listener: ReadAll failed: %s\n", err)
 		return
 	}
 
 	if len(data) > msgMax {
-		slog.Error("decodeNodeInfo: payload exceeds max. size",
-			"MaxListenerMessageSize", msgMax,
-			"size", len(data))
+		fmt.Printf("listener: payload exceeds max size: %d\n", len(data))
 		return
 	}
 
 	var msg bus.NodeInfo
 	if err := json.NewDecoder(bytes.NewReader(data)).Decode(&msg); err != nil {
-		slog.Error("decodeNodeInfo failed", "error", err)
+		fmt.Printf("listener: json decode failed: %s\n", err)
 		return
 	}
 	bus.Publish(msg)
@@ -55,7 +52,7 @@ func acceptor(listener net.Listener) <-chan net.Conn {
 					close(out)
 					return
 				} else {
-					fmt.Println("Error accepting conn:", err)
+					fmt.Printf("listener: Accept failed: %s\n", err)
 					continue
 				}
 			}
@@ -93,7 +90,7 @@ func (l *Listener) Init() error {
 		}
 	}()
 
-	slog.Info("node listener listens on", "address", listener.Addr())
+	fmt.Printf("listener: listening on %s\n", listener.Addr())
 
 	return nil
 }
