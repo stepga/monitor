@@ -8,7 +8,7 @@ import (
 	"github.com/stepga/monitor/node"
 )
 
-const BusMsgSize = 16
+const subscriberChannelBufferSize = 16
 
 var globalBus = &Bus{
 	subscribers: make(map[chan any]struct{}),
@@ -220,7 +220,7 @@ type Bus struct {
 }
 
 func (b *Bus) subscribe() chan any {
-	ch := make(chan any, BusMsgSize)
+	ch := make(chan any, subscriberChannelBufferSize)
 	b.lock.Lock()
 	b.subscribers[ch] = struct{}{}
 	b.lock.Unlock()
