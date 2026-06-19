@@ -1,4 +1,4 @@
-.PHONY: all daemon node node_pi
+.PHONY: all daemon node node_pi node_openbsd
 
 all: daemon node node_openbsd node_pi
 daemon: bin/daemon
