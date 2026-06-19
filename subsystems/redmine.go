@@ -78,7 +78,6 @@ func (r *Redmine) updateIssue(url, issue_id string) {
 			fmt.Printf("redmine: failed to get issue: %s\n", err)
 			return
 		}
-		fmt.Printf("Current stauts: %d\n", status)
 
 		if status != 2 {
 			// If status isn't In progress (2) update it
