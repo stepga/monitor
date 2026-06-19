@@ -1,0 +1,11 @@
+docker_build:
+  tags:
+    - public-docker
+  image: golang:1.25
+  script:
+    - go mod download
+    - make all
+  artifacts:
+    paths:
+      - bin/
+    expire_in: 1 week
