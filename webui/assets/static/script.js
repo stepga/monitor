@@ -77,22 +77,27 @@ document.addEventListener("DOMContentLoaded", function(){
 
 function createNotification(data) {
 	var date = new Date();
-	var timestamp = date.toLocaleTimeString()
+	var timestamp = date.toLocaleTimeString();
 
 	const detail = document.createElement("details");
-	detail.innerHTML = `
-		<summary>
-			<span>${timestamp}</span>
-			<span>${data['Summary']}</span>
-		</summary>
-	`;
+	const summary = document.createElement("summary");
+	const timestamp_span = document.createElement("span");
+	const summary_span = document.createElement("span");
+	const detail_div = document.createElement("div");
+	const detail_pre = document.createElement("pre");
 
-	detail.insertAdjacentHTML('beforeend', `
-	<div class="details">
-		<pre>
-${data['Details']}
-		</pre>
-	</div>`);
+	timestamp_span.textContent = timestamp;
+	summary_span.textContent = data['Summary'];
+
+	detail_div.classList.add("details");
+	detail_pre.textContent = data['Details'];
+
+	detail_div.appendChild(detail_pre);
+	summary.appendChild(timestamp_span);
+	summary.appendChild(summary_span);
+
+	detail.appendChild(summary);
+	detail.appendChild(detail_div);
 
 	return detail;
 }
