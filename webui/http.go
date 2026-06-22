@@ -12,10 +12,10 @@ import (
 	"github.com/stepga/monitor/store"
 )
 
-// Report format for WebUI messages sent from daemon to browser
-type WebUiMessage struct {
-	Summary string
-	Details string
+// Serialize bus.Info for sending from daemon to browser
+type WebUiInfo struct {
+	Summary string `json:"summary"`
+	Details string `json:"details"`
 }
 
 //go:embed assets/*
@@ -62,13 +62,13 @@ func (s *Server) notificationHandler(w http.ResponseWriter, r *http.Request) {
 		case m := <-ch:
 			switch msg := m.(type) {
 			case bus.Info:
-				webUiMessage := infoToWebUiMessage(msg)
-				webUiMessageJson, err := json.Marshal(webUiMessage)
+				webUiInfo := infoToWebUiInfo(msg)
+				webUiInfoJson, err := json.Marshal(webUiInfo)
 				if err != nil {
-					slog.Error("json encoding of WebUiMessage failed", "error", err, "webUiMessage", webUiMessage)
+					slog.Error("json encoding of WebUiInfo failed", "error", err, "webUiInfo", webUiInfo)
 					continue
 				}
-				sseSendData(w, string(webUiMessageJson))
+				sseSendData(w, string(webUiInfoJson))
 
 				err = responseController.Flush()
 				if err != nil {
@@ -92,19 +92,19 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) criticalHandler(w http.ResponseWriter, _ *http.Request) {
-	var messages []WebUiMessage
+	var infos []WebUiInfo
 	w.Header().Set("Content-Type", "application/json")
 	for _, critical := range store.FetchCritical() {
-		messages = append(messages, infoToWebUiMessage(critical))
+		infos = append(infos, infoToWebUiInfo(critical))
 	}
-	err := json.NewEncoder(w).Encode(messages)
+	err := json.NewEncoder(w).Encode(infos)
 	if err != nil {
 		slog.Error("criticalHandler() json encoding failed", "error", err)
 	}
 }
 
-func infoToWebUiMessage(info bus.Info) WebUiMessage {
-	return WebUiMessage{
+func infoToWebUiInfo(info bus.Info) WebUiInfo {
+	return WebUiInfo{
 		Summary: info.Summary(),
 		Details: info.Details(),
 	}

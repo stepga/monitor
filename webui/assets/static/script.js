@@ -82,7 +82,7 @@ function createNotification(data) {
 	timestamp_span.classList.add("timestamp");
 
 	const summary_span = document.createElement("span");
-	summary_span.textContent = data['Summary'];
+	summary_span.textContent = data['summary'];
 	summary_span.classList.add("summary");
 
 	const summary = document.createElement("summary");
@@ -90,7 +90,7 @@ function createNotification(data) {
 	summary.appendChild(summary_span);
 
 	const detail_pre = document.createElement("pre");
-	detail_pre.textContent = data['Details'];
+	detail_pre.textContent = data['details'];
 
 	const detail_div = document.createElement("div");
 	detail_div.classList.add("details");
