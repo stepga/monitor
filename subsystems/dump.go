@@ -27,52 +27,62 @@ func expandHome(path string) (string, error) {
 	return path, nil
 }
 
-func pathExists(path string) (bool, error) {
-	path, err := expandHome(path)
+func pathCheck(path string) (string, error) {
+	expandedPath, err := expandHome(path)
 	if err != nil {
-		return false, err
+		return "", err
 	}
-
-	_, err = os.Stat(path)
-	if err == nil {
-		return true, nil
+	_, err = os.Stat(expandedPath)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
 	}
 	if os.IsNotExist(err) {
-		return false, nil
+		slog.Info("Dump: path does not exist yet", "path", path)
 	}
-	return false, err
+	return path, nil
+}
+
+func dumpCritical(path string) error {
+	dumps := []bus.CriticalDump{}
+	for _, critical := range store.FetchCritical() {
+		dump, err := critical.Dump()
+		if err != nil {
+			return fmt.Errorf("Dump() of '%s' failed: %v", critical.Identifier(), err)
+		}
+		dumps = append(dumps, *dump)
+	}
+	data, err := json.MarshalIndent(dumps, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
+}
+
+func restoreCritical(path string) error {
+	_ = path
+	// TODO
+	return nil
 }
 
 func (r *Dump) Init() error {
-	dumpPath, err := expandHome(config.Cfg.DumpPath)
+	path, err := pathCheck(config.Cfg.DumpPath)
 	if err != nil {
 		return fmt.Errorf("Dump: path error: %v", err)
 	}
-	_, err = os.Stat(dumpPath)
-	if err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("Dump: path error: %v", err)
-	}
-	if os.IsNotExist(err) {
-		slog.Info("Dump: path does not exist yet", "path", dumpPath)
-	}
 
-	// TODO: restore file
+	err = restoreCritical(path)
 
 	ch := bus.Subscribe()
 	go func() {
 		defer bus.Unsubscribe(ch)
 		for msg := range ch {
-			switch msg.(type) {
-			case bus.CriticalListChanged:
-				slog.Error("XXX fetch")
-				infos := store.FetchCritical()
-				b, err := json.MarshalIndent(infos, "", "  ")
-				if err != nil {
-					slog.Error("XXX", "error", err)
-					continue
-				}
-				os.WriteFile(dumpPath, b, 0644)
-			default:
+			if _, ok := msg.(bus.CriticalListChanged); !ok {
+				continue
+			}
+			err := dumpCritical(path)
+			if err != nil {
+				slog.Error("Dump: dumpCritical() failed", "error", err)
+
 			}
 		}
 	}()

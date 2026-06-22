@@ -1,6 +1,7 @@
 package bus
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -126,7 +127,7 @@ type Info interface {
 // message with the same Identifier is published and clears it again.
 type Critical interface {
 	Info
-	_critical()
+	Dump() (*CriticalDump, error)
 }
 
 // Bus Message interface implementations
@@ -328,11 +329,27 @@ func (n NodeTimeout) Identifier() string     { return "Node:" + n.Hostname }
 func (n RebootRequired) Identifier() string  { return "Reboot:" + n.Hostname }
 func (n Rebooted) Identifier() string        { return "Reboot:" + n.Hostname }
 
-func (DiskGettingFull) _critical() {}
-func (CertError) _critical()       {}
-func (CertExpiresSoon) _critical() {}
-func (NodeTimeout) _critical()     {}
-func (RebootRequired) _critical()  {}
+type CriticalDump struct {
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data"`
+}
+
+func doDump(typeName string, obj any) (*CriticalDump, error) {
+	data, err := json.MarshalIndent(obj, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return &CriticalDump{
+		Type: typeName,
+		Data: data,
+	}, nil
+}
+
+func (d DiskGettingFull) Dump() (*CriticalDump, error) { return doDump("DiskGettingFull", d) }
+func (c CertError) Dump() (*CriticalDump, error)       { return doDump("CertError", c) }
+func (c CertExpiresSoon) Dump() (*CriticalDump, error) { return doDump("CertExpiresSoon", c) }
+func (n NodeTimeout) Dump() (*CriticalDump, error)     { return doDump("NodeTimeout", n) }
+func (r RebootRequired) Dump() (*CriticalDump, error)  { return doDump("RebootRequired", r) }
 
 // Bus Implementaiton
 

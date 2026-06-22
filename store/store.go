@@ -7,12 +7,12 @@ import (
 )
 
 type Store struct {
-	critical map[string]bus.Info
+	critical map[string]bus.Critical
 	lock     sync.RWMutex
 }
 
 var store = &Store{
-	critical: make(map[string]bus.Info),
+	critical: make(map[string]bus.Critical),
 }
 
 func Start() {
@@ -47,8 +47,8 @@ func Start() {
 	}()
 }
 
-func FetchCritical() []bus.Info {
-	ret := make([]bus.Info, 0, len(store.critical))
+func FetchCritical() []bus.Critical {
+	ret := make([]bus.Critical, 0, len(store.critical))
 
 	store.lock.RLock()
 	for _, v := range store.critical {
