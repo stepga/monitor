@@ -67,4 +67,5 @@ type Config struct {
 	WebUiAddress  string          `json:"webui_address"`
 	Heartbeat     HeartbeatConfig `json:"heartbeat"`
 	Redmine       RedmineConfig   `json:"redmine"`
+	DumpPath      string          `json:"dump_path"`
 }

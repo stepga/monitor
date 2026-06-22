@@ -1,6 +1,7 @@
 {
     "webui_address": "0.0.0.0:8899",
-    "subsystems": ["listener", "cert", "stdout", "webui", "heartbeat", "diskmon", "rebootmon"],
+    "dump_path": "~/.config/monitor_dump.json",
+    "subsystems": ["dump", "listener", "cert", "stdout", "webui", "heartbeat", "diskmon", "rebootmon"],
     "listener": {
         "address": "127.0.0.1:5566",
         "max_msg_size_mb": 5

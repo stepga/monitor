@@ -25,6 +25,7 @@ var AvailableSubsystems = map[string]subsystems.Subsystem{
 	"diskmon":   &subsystems.Diskmon{},
 	"rebootmon": &subsystems.Rebootmon{},
 	"redmine":   &subsystems.Redmine{},
+	"dump":      &subsystems.Dump{},
 }
 
 func main() {
