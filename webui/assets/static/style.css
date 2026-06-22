@@ -13,7 +13,9 @@ details {
 }
 
 details summary span.timestamp {
-        margin: 0.5rem;
+	margin: 0.5rem;
+	padding-right: 0.5rem;
+	border-right: 2px solid #ccc;
 }
 
 #critical details {
