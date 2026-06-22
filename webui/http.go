@@ -81,13 +81,21 @@ func (s *Server) notificationHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "GET":
-		// TODO: further security measures as path sanitizing
-		http.ServeFileFS(w, r, assetsFS, "assets"+r.URL.Path)
-	default:
+	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(w, "Only GET supported")
+		return
+	}
+	switch path := r.URL.Path; path {
+	case "/index.html":
+		fallthrough
+	case "/static/style.css":
+		fallthrough
+	case "/static/script.js":
+		http.ServeFileFS(w, r, assetsFS, "assets"+path)
+	default:
+		slog.Error("assetsFileHandler: requested asset url not whitelisted", "url", path)
+		w.WriteHeader(http.StatusNotFound)
 	}
 }
 
