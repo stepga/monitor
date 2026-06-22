@@ -12,6 +12,10 @@ details {
 	word-wrap: break-word
 }
 
+details summary span.timestamp {
+        margin: 0.5rem;
+}
+
 #critical details {
 	box-shadow: 2px 2px 2px red;
 }
