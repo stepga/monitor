@@ -50,13 +50,16 @@ func certExpiry(rawURL string) (*time.Time, error) {
 	return &cert.NotAfter, nil
 }
 
-func CheckCerts(urls []string) []bus.CertInfo {
+func checkCerts(urls []string) []bus.CertInfo {
 	var wg sync.WaitGroup
 	outChan := make(chan bus.CertInfo)
 
 	for _, u := range urls {
 		wg.Go(func() {
-			result := bus.CertInfo{Url: u}
+			result := bus.CertInfo{
+				Url:  u,
+				Time: time.Now(),
+			}
 			start := time.Now()
 			expiry, err := certExpiry(u)
 			result.Took = time.Since(start)
@@ -83,31 +86,33 @@ func CheckCerts(urls []string) []bus.CertInfo {
 func (c *CertCheck) Init() error {
 	go func() {
 		for {
-			info := CheckCerts(config.Cfg.Cert.Urls)
+			infos := checkCerts(config.Cfg.Cert.Urls)
 			threshold := time.Duration(config.Cfg.Cert.MinimumDaysLeft*24) * time.Hour
-			for _, info := range info {
+			for _, info := range infos {
 				bus.Publish(info)
 				remaining := time.Until(info.Expiry)
 				if info.Error != nil {
 					bus.Publish(bus.CertError{
 						Url:   info.Url,
 						Error: info.Error,
+						Time:  info.Time,
 					})
 				} else if remaining < threshold {
 					bus.Publish(bus.CertExpiresSoon{
 						Url:       info.Url,
 						Remaining: remaining,
 						Expiry:    info.Expiry,
+						Time:      info.Time,
 					})
 				} else {
 					bus.Publish(bus.CertOk{
 						Url:       info.Url,
 						Remaining: remaining,
 						Expiry:    info.Expiry,
+						Time:      info.Time,
 					})
 				}
 			}
-
 			time.Sleep(config.Cfg.Cert.CheckIntervalInHours * time.Hour)
 		}
 	}()

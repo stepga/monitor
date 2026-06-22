@@ -22,12 +22,14 @@ type CertInfo struct {
 	Expiry time.Time
 	Error  error
 	Took   time.Duration
+	Time   time.Time
 }
 
 // Reported when looking up the certificate failed
 type CertError struct {
 	Url   string
 	Error error
+	Time  time.Time
 }
 
 // Reported when a cert expires soon
@@ -35,6 +37,7 @@ type CertExpiresSoon struct {
 	Url       string
 	Remaining time.Duration
 	Expiry    time.Time
+	Time      time.Time
 }
 
 // Reported when a cert is ok
@@ -42,29 +45,34 @@ type CertOk struct {
 	Url       string
 	Remaining time.Duration
 	Expiry    time.Time
+	Time      time.Time
 }
 
 // Reported when a node stopped reporting
 type NodeTimeout struct {
 	Hostname string
 	LastSeen time.Time
+	Time     time.Time
 }
 
 // Reported when a new node started
 type NewNode struct {
 	Hostname string
+	Time     time.Time
 }
 
 // Reported when a disk is full
 type DiskGettingFull struct {
 	Hostname string
 	Disk     node.FileSystem
+	Time     time.Time
 }
 
 // Report when a disk is fine again
 type DiskFineAgain struct {
 	Hostname string
 	Disk     node.FileSystem
+	Time     time.Time
 }
 
 // Reported when config.Cfg was reloaded
@@ -72,6 +80,7 @@ type ConfigReloaded struct{}
 
 // Reported when a node sends a message to the daemon
 type NodeInfo struct {
+	Time time.Time
 	// as reported by `uname -n`
 	Hostname string `json:"hostname"`
 	// as reported by `uname -s`
@@ -89,11 +98,13 @@ type NodeInfo struct {
 // Reported when a Node requires reboot
 type RebootRequired struct {
 	Hostname string
+	Time     time.Time
 }
 
 // Reported when a Node was rebooted
 type Rebooted struct {
 	Hostname string
+	Time     time.Time
 }
 
 // Reported when the list of critical messages in store/store.go changes
@@ -108,6 +119,7 @@ type Info interface {
 	Summary() string
 	Identifier() string
 	Details() string
+	Timestamp() string
 }
 
 // Critical messages are alerts that stay active until a non-critical
@@ -286,14 +298,33 @@ func (n Rebooted) Details() string {
 	)
 }
 
-func (d DiskGettingFull) Identifier() string { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
-func (d DiskFineAgain) Identifier() string   { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
+func getTimestamp(t *time.Time) string {
+	ret := time.Now()
+	if t != nil && !t.IsZero() {
+		ret = *t
+	}
+	return ret.Format(time.DateTime)
+}
+func (c CertError) Timestamp() string       { return getTimestamp(&c.Time) }
+func (c CertExpiresSoon) Timestamp() string { return getTimestamp(&c.Time) }
+func (c CertInfo) Timestamp() string        { return getTimestamp(&c.Time) }
+func (c CertOk) Timestamp() string          { return getTimestamp(&c.Time) }
+func (d DiskFineAgain) Timestamp() string   { return getTimestamp(&d.Time) }
+func (d DiskGettingFull) Timestamp() string { return getTimestamp(&d.Time) }
+func (n NewNode) Timestamp() string         { return getTimestamp(&n.Time) }
+func (n NodeInfo) Timestamp() string        { return getTimestamp(&n.Time) }
+func (n NodeTimeout) Timestamp() string     { return getTimestamp(&n.Time) }
+func (r RebootRequired) Timestamp() string  { return getTimestamp(&r.Time) }
+func (r Rebooted) Timestamp() string        { return getTimestamp(&r.Time) }
+
 func (c CertError) Identifier() string       { return "Cert:" + c.Url }
 func (c CertExpiresSoon) Identifier() string { return "Cert:" + c.Url }
 func (c CertOk) Identifier() string          { return "Cert:" + c.Url }
+func (d DiskFineAgain) Identifier() string   { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
+func (d DiskGettingFull) Identifier() string { return "DiskUsage:" + d.Hostname + ":" + d.Disk.Source }
 func (n NewNode) Identifier() string         { return "Node:" + n.Hostname }
-func (n NodeTimeout) Identifier() string     { return "Node:" + n.Hostname }
 func (n NodeInfo) Identifier() string        { return "Node:" + n.Hostname }
+func (n NodeTimeout) Identifier() string     { return "Node:" + n.Hostname }
 func (n RebootRequired) Identifier() string  { return "Reboot:" + n.Hostname }
 func (n Rebooted) Identifier() string        { return "Reboot:" + n.Hostname }
 

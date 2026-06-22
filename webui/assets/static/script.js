@@ -76,9 +76,8 @@ document.addEventListener("DOMContentLoaded", function(){
 });
 
 function createNotification(data) {
-	var date = new Date();
 	const timestamp_span = document.createElement("span");
-	timestamp_span.textContent = date.toLocaleTimeString();
+	timestamp_span.textContent = data['timestamp'];
 	timestamp_span.classList.add("timestamp");
 
 	const summary_span = document.createElement("span");

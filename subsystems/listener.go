@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"time"
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
@@ -31,12 +32,13 @@ func decodeNodeInfo(conn net.Conn) {
 		return
 	}
 
-	var msg bus.NodeInfo
-	if err := json.NewDecoder(bytes.NewReader(data)).Decode(&msg); err != nil {
+	var info bus.NodeInfo
+	if err := json.NewDecoder(bytes.NewReader(data)).Decode(&info); err != nil {
 		fmt.Printf("listener: json decode failed: %s\n", err)
 		return
 	}
-	bus.Publish(msg)
+	info.Time = time.Now()
+	bus.Publish(info)
 }
 
 // Starts a goroutine that accepts connections from listener and

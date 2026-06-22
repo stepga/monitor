@@ -2,6 +2,7 @@ package subsystems
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
@@ -25,11 +26,13 @@ func (_ *Rebootmon) Init() error {
 				if msg.RebootRequired && !exists {
 					bus.Publish(bus.RebootRequired{
 						Hostname: msg.Hostname,
+						Time:     time.Now(),
 					})
 					rebootsReported[msg.Hostname] = struct{}{}
 				} else if !msg.RebootRequired && exists {
 					bus.Publish(bus.Rebooted{
 						Hostname: msg.Hostname,
+						Time:     time.Now(),
 					})
 					delete(rebootsReported, msg.Hostname)
 				}

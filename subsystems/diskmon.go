@@ -2,6 +2,7 @@ package subsystems
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
@@ -32,12 +33,14 @@ func (_ *Diskmon) Init() error {
 						bus.Publish(bus.DiskGettingFull{
 							Hostname: msg.Hostname,
 							Disk:     fs,
+							Time:     time.Now(),
 						})
 						disksReported[key] = struct{}{}
 					} else if !full && exists {
 						bus.Publish(bus.DiskFineAgain{
 							Hostname: msg.Hostname,
 							Disk:     fs,
+							Time:     time.Now(),
 						})
 						delete(disksReported, key)
 					}

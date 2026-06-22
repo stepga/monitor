@@ -17,6 +17,7 @@ func (h *Heartbeat) nodePing(hostname string) {
 	if !exists {
 		bus.Publish(bus.NewNode{
 			Hostname: hostname,
+			Time:     time.Now(),
 		})
 	}
 	h.reports[hostname] = time.Now()
@@ -30,6 +31,7 @@ func (h *Heartbeat) tick() {
 			bus.Publish(bus.NodeTimeout{
 				Hostname: hostname,
 				LastSeen: lastSeen,
+				Time:     time.Now(),
 			})
 			delete(h.reports, hostname)
 		}

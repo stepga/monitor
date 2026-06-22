@@ -14,8 +14,9 @@ import (
 
 // Serialize bus.Info for sending from daemon to browser
 type WebUiInfo struct {
-	Summary string `json:"summary"`
-	Details string `json:"details"`
+	Summary   string `json:"summary"`
+	Details   string `json:"details"`
+	Timestamp string `json:"timestamp"`
 }
 
 //go:embed assets/*
@@ -113,8 +114,9 @@ func (s *Server) criticalHandler(w http.ResponseWriter, _ *http.Request) {
 
 func infoToWebUiInfo(info bus.Info) WebUiInfo {
 	return WebUiInfo{
-		Summary: info.Summary(),
-		Details: info.Details(),
+		Summary:   info.Summary(),
+		Details:   info.Details(),
+		Timestamp: info.Timestamp(),
 	}
 }
 

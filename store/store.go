@@ -28,6 +28,7 @@ func Start() {
 				if !exists {
 					store.critical[msg.Identifier()] = msg
 					changed = true
+				} else {
 				}
 				store.lock.Unlock()
 			case bus.Info:
