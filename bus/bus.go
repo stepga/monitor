@@ -1,7 +1,6 @@
 package bus
 
 import (
-	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -17,19 +16,11 @@ var globalBus = &Bus{
 
 // List of Bus Messages
 
-// XXX: Why are we using `Error string` instead of `Error error` in
-// bus message types?
-
-// As we are dumping our critical Info types (e.g. CertError and
-// CertExpiresSoon) to JSON, it's easier to use strings,
-// as encoding/json would not know which concrete type of error
-// to instantiate during unmarshalling.
-
 // Reported for every checked certificate
 type CertInfo struct {
 	Url    string
 	Expiry time.Time
-	Error  string
+	Error  error
 	Took   time.Duration
 	Time   time.Time
 }
@@ -37,7 +28,7 @@ type CertInfo struct {
 // Reported when looking up the certificate failed
 type CertError struct {
 	Url   string
-	Error string
+	Error error
 	Time  time.Time
 }
 
@@ -135,7 +126,7 @@ type Info interface {
 // message with the same Identifier is published and clears it again.
 type Critical interface {
 	Info
-	Dump() (*CriticalDump, error)
+	_critical()
 }
 
 // Bus Message interface implementations
@@ -337,35 +328,11 @@ func (n NodeTimeout) Identifier() string     { return "Node:" + n.Hostname }
 func (n RebootRequired) Identifier() string  { return "Reboot:" + n.Hostname }
 func (n Rebooted) Identifier() string        { return "Reboot:" + n.Hostname }
 
-type CriticalDump struct {
-	Type string          `json:"type"`
-	Data json.RawMessage `json:"data"`
-}
-
-func doDump(typeName string, obj any) (*CriticalDump, error) {
-	data, err := json.MarshalIndent(obj, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	return &CriticalDump{
-		Type: typeName,
-		Data: data,
-	}, nil
-}
-
-func (d DiskGettingFull) Dump() (*CriticalDump, error) { return doDump("DiskGettingFull", d) }
-func (c CertError) Dump() (*CriticalDump, error)       { return doDump("CertError", c) }
-func (c CertExpiresSoon) Dump() (*CriticalDump, error) { return doDump("CertExpiresSoon", c) }
-func (n NodeTimeout) Dump() (*CriticalDump, error)     { return doDump("NodeTimeout", n) }
-func (r RebootRequired) Dump() (*CriticalDump, error)  { return doDump("RebootRequired", r) }
-
-var CriticalRegistry = map[string]func() Critical{
-	"DiskGettingFull": func() Critical { return &DiskGettingFull{} },
-	"CertError":       func() Critical { return &CertError{} },
-	"CertExpiresSoon": func() Critical { return &CertExpiresSoon{} },
-	"NodeTimeout":     func() Critical { return &NodeTimeout{} },
-	"RebootRequired":  func() Critical { return &RebootRequired{} },
-}
+func (DiskGettingFull) _critical() {}
+func (CertError) _critical()       {}
+func (CertExpiresSoon) _critical() {}
+func (NodeTimeout) _critical()     {}
+func (RebootRequired) _critical()  {}
 
 // Bus Implementaiton
 

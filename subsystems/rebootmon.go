@@ -6,7 +6,6 @@ import (
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
-	"github.com/stepga/monitor/store"
 )
 
 type Rebootmon struct{}
@@ -19,21 +18,23 @@ func (_ *Rebootmon) Init() error {
 	go func() {
 		ch := bus.Subscribe()
 		defer bus.Unsubscribe(ch)
+		rebootsReported := make(map[string]struct{})
 		for m := range ch {
 			switch msg := m.(type) {
 			case bus.NodeInfo:
-				critical := bus.RebootRequired{
-					Hostname: msg.Hostname,
-					Time:     time.Now(),
-				}
-				exists := store.Exists(critical)
+				_, exists := rebootsReported[msg.Hostname]
 				if msg.RebootRequired && !exists {
-					bus.Publish(critical)
+					bus.Publish(bus.RebootRequired{
+						Hostname: msg.Hostname,
+						Time:     time.Now(),
+					})
+					rebootsReported[msg.Hostname] = struct{}{}
 				} else if !msg.RebootRequired && exists {
 					bus.Publish(bus.Rebooted{
 						Hostname: msg.Hostname,
 						Time:     time.Now(),
 					})
+					delete(rebootsReported, msg.Hostname)
 				}
 			}
 		}

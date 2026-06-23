@@ -64,7 +64,7 @@ func checkCerts(urls []string) []bus.CertInfo {
 			expiry, err := certExpiry(u)
 			result.Took = time.Since(start)
 			if err != nil {
-				result.Error = err.Error()
+				result.Error = err
 			} else {
 				result.Expiry = *expiry
 			}
@@ -91,7 +91,7 @@ func (c *CertCheck) Init() error {
 			for _, info := range infos {
 				bus.Publish(info)
 				remaining := time.Until(info.Expiry)
-				if info.Error != "" {
+				if info.Error != nil {
 					bus.Publish(bus.CertError{
 						Url:   info.Url,
 						Error: info.Error,
