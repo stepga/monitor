@@ -21,3 +21,9 @@ jobs:
 
       - name: Run make all
         run: make all
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: bin/
