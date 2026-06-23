@@ -15,6 +15,45 @@ var store = &Store{
 	critical: make(map[string]bus.Critical),
 }
 
+func (store *Store) Add(msg bus.Critical) bool {
+	store.lock.Lock()
+	defer store.lock.Unlock()
+
+	_, exists := store.critical[msg.Identifier()]
+	if !exists {
+		store.critical[msg.Identifier()] = msg
+		return true
+	}
+	return false
+}
+
+func (store *Store) Exists(msg bus.Critical) bool {
+	store.lock.Lock()
+	defer store.lock.Unlock()
+
+	_, exists := store.critical[msg.Identifier()]
+	return exists
+}
+
+func (store *Store) Delete(msg bus.Info) bool {
+	store.lock.Lock()
+	defer store.lock.Unlock()
+
+	_, exists := store.critical[msg.Identifier()]
+	if exists {
+		delete(store.critical, msg.Identifier())
+		return true
+	}
+	return false
+}
+
+func Add(msg bus.Critical) bool {
+	return store.Add(msg)
+}
+
+func Exists(msg bus.Critical) bool {
+	return store.Exists(msg)
+}
 func Start() {
 	go func() {
 		ch := bus.Subscribe()
@@ -23,22 +62,9 @@ func Start() {
 			changed := false
 			switch msg := m.(type) {
 			case bus.Critical:
-				store.lock.Lock()
-				_, exists := store.critical[msg.Identifier()]
-				if !exists {
-					store.critical[msg.Identifier()] = msg
-					changed = true
-				} else {
-				}
-				store.lock.Unlock()
+				changed = store.Add(msg)
 			case bus.Info:
-				store.lock.Lock()
-				_, exists := store.critical[msg.Identifier()]
-				if exists {
-					delete(store.critical, msg.Identifier())
-					changed = true
-				}
-				store.lock.Unlock()
+				changed = store.Delete(msg)
 			}
 			if changed {
 				bus.Publish(bus.CriticalListChanged{})

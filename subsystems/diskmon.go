@@ -6,6 +6,7 @@ import (
 
 	"github.com/stepga/monitor/bus"
 	"github.com/stepga/monitor/config"
+	"github.com/stepga/monitor/store"
 )
 
 type Diskmon struct{}
@@ -18,7 +19,6 @@ func (_ *Diskmon) Init() error {
 	go func() {
 		ch := bus.Subscribe()
 		defer bus.Unsubscribe(ch)
-		disksReported := make(map[string]struct{})
 		for m := range ch {
 			switch msg := m.(type) {
 			case bus.NodeInfo:
@@ -26,23 +26,21 @@ func (_ *Diskmon) Init() error {
 					if fs.Source == "none" {
 						continue
 					}
-					key := msg.Hostname + ":" + fs.Source
-					_, exists := disksReported[key]
+					critical := bus.DiskGettingFull{
+						Hostname: msg.Hostname,
+						Disk:     fs,
+						Time:     time.Now(),
+					}
+					exists := store.Exists(critical)
 					full := float64(fs.UsedBytes) > (float64(fs.AvailableBytes+fs.UsedBytes) * float64(config.Cfg.DiskThreshold))
 					if full && !exists {
-						bus.Publish(bus.DiskGettingFull{
-							Hostname: msg.Hostname,
-							Disk:     fs,
-							Time:     time.Now(),
-						})
-						disksReported[key] = struct{}{}
+						bus.Publish(critical)
 					} else if !full && exists {
 						bus.Publish(bus.DiskFineAgain{
 							Hostname: msg.Hostname,
 							Disk:     fs,
 							Time:     time.Now(),
 						})
-						delete(disksReported, key)
 					}
 				}
 			}

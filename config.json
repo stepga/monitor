@@ -6,7 +6,7 @@
         "address": "127.0.0.1:5566",
         "max_msg_size_mb": 5
     },
-    "disk_threshold": 0.8,
+    "disk_threshold": 0.81,
     "cert": {
         "minimum_days_left": 5,
         "check_interval_in_hours": 24,

@@ -17,11 +17,19 @@ var globalBus = &Bus{
 
 // List of Bus Messages
 
+// XXX: Why are we using `Error string` instead of `Error error` in
+// bus message types?
+
+// As we are dumping our critical Info types (e.g. CertError and
+// CertExpiresSoon) to JSON, it's easier to use strings,
+// as encoding/json would not know which concrete type of error
+// to instantiate during unmarshalling.
+
 // Reported for every checked certificate
 type CertInfo struct {
 	Url    string
 	Expiry time.Time
-	Error  error
+	Error  string
 	Took   time.Duration
 	Time   time.Time
 }
@@ -29,7 +37,7 @@ type CertInfo struct {
 // Reported when looking up the certificate failed
 type CertError struct {
 	Url   string
-	Error error
+	Error string
 	Time  time.Time
 }
 
@@ -350,6 +358,14 @@ func (c CertError) Dump() (*CriticalDump, error)       { return doDump("CertErro
 func (c CertExpiresSoon) Dump() (*CriticalDump, error) { return doDump("CertExpiresSoon", c) }
 func (n NodeTimeout) Dump() (*CriticalDump, error)     { return doDump("NodeTimeout", n) }
 func (r RebootRequired) Dump() (*CriticalDump, error)  { return doDump("RebootRequired", r) }
+
+var CriticalRegistry = map[string]func() Critical{
+	"DiskGettingFull": func() Critical { return &DiskGettingFull{} },
+	"CertError":       func() Critical { return &CertError{} },
+	"CertExpiresSoon": func() Critical { return &CertExpiresSoon{} },
+	"NodeTimeout":     func() Critical { return &NodeTimeout{} },
+	"RebootRequired":  func() Critical { return &RebootRequired{} },
+}
 
 // Bus Implementaiton
 

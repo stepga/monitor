@@ -37,9 +37,9 @@ func pathCheck(path string) (string, error) {
 		return "", err
 	}
 	if os.IsNotExist(err) {
-		slog.Info("Dump: path does not exist yet", "path", path)
+		slog.Info("Dump: path does not exist yet", "expandedPath", expandedPath)
 	}
-	return path, nil
+	return expandedPath, nil
 }
 
 func dumpCritical(path string) error {
@@ -58,9 +58,42 @@ func dumpCritical(path string) error {
 	return os.WriteFile(path, data, 0644)
 }
 
+func restoreData(data []byte) ([]bus.Critical, error) {
+	var dumps []bus.CriticalDump
+
+	if err := json.Unmarshal(data, &dumps); err != nil {
+		return nil, err
+	}
+
+	result := make([]bus.Critical, 0, len(dumps))
+
+	for _, dump := range dumps {
+		factory, ok := bus.CriticalRegistry[dump.Type]
+		if !ok {
+			return nil, fmt.Errorf("unknown type %q", dump.Type)
+		}
+		obj := factory()
+		if err := json.Unmarshal(dump.Data, obj); err != nil {
+			return nil, err
+		}
+		result = append(result, obj)
+	}
+
+	return result, nil
+}
+
 func restoreCritical(path string) error {
-	_ = path
-	// TODO
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	criticals, err := restoreData(data)
+	if err != nil {
+		return err
+	}
+	for _, critical := range criticals {
+		store.Add(critical)
+	}
 	return nil
 }
 
@@ -71,6 +104,9 @@ func (r *Dump) Init() error {
 	}
 
 	err = restoreCritical(path)
+	if err != nil {
+		slog.Error("Dump: restoring dump file failed", "error", err)
+	}
 
 	ch := bus.Subscribe()
 	go func() {
@@ -82,7 +118,6 @@ func (r *Dump) Init() error {
 			err := dumpCritical(path)
 			if err != nil {
 				slog.Error("Dump: dumpCritical() failed", "error", err)
-
 			}
 		}
 	}()
