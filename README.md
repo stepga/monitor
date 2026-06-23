@@ -192,18 +192,17 @@ Having two interfaces allows for filtering, e.g. the pushover
 subsystems is only interested in important messages while a logging
 subsystem would log any information.
 
-### Sticky Info messages
+### Critical Info messages
 
-Most important info messages are sticky, in the sense that they should
-"stick around" until they are resolved. For example if a cert is
-nearing end of life, the message is relevant until the certificate is
-renewed.
-This is implemented as sticky messages. The store (see
-`store/store.go`) will listen for every Info message and keep sticky
-messages until a non-sticky Info message with the same ID is
+Most important info messages are critical and they should persist until
+they are resolved. For example if a cert is nearing end of life, the message
+is relevant until the certificate is renewed.
+This is implemented as critical messages. The store (see
+`store/store.go`) will listen for every Info message and keep critical
+messages until a non-critical Info message with the same ID is
 published.
-This allows one to get all sticky messages that occured but were not
-cleared yet (see `store.FetchSticky`).
+This allows one to get all critical messages that occured but were not
+cleared yet (see `store.FetchCritical`).
 
 ## Node Architecture
 
