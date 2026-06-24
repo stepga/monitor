@@ -2,6 +2,13 @@
 
 Basic monitoring system of one daemon and multiple nodes.
 
+## TODOs
+
+- webui: delete button for critical notifications
+- subsystem: uptime monitor
+- openbsd reboot_required: syspatches applied
+- daemon: remove slog (when used with systemd, configurable?)
+
 ## Daemon Architecture
 
 To allow a dynamic configuration of different reports or data
