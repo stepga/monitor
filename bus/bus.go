@@ -126,7 +126,7 @@ type Info interface {
 // message with the same Identifier is published and clears it again.
 type Critical interface {
 	Info
-	_critical()
+	Critical()
 }
 
 // Bus Message interface implementations
@@ -328,11 +328,11 @@ func (n NodeTimeout) Identifier() string     { return "Node:" + n.Hostname }
 func (n RebootRequired) Identifier() string  { return "Reboot:" + n.Hostname }
 func (n Rebooted) Identifier() string        { return "Reboot:" + n.Hostname }
 
-func (DiskGettingFull) _critical() {}
-func (CertError) _critical()       {}
-func (CertExpiresSoon) _critical() {}
-func (NodeTimeout) _critical()     {}
-func (RebootRequired) _critical()  {}
+func (DiskGettingFull) Critical() {}
+func (CertError) Critical()       {}
+func (CertExpiresSoon) Critical() {}
+func (NodeTimeout) Critical()     {}
+func (RebootRequired) Critical()  {}
 
 // Bus Implementaiton
 

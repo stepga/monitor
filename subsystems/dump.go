@@ -16,17 +16,17 @@ import (
 
 type Dump struct{}
 type DumpObject struct {
-	summary    string
-	identifier string
-	details    string
-	timestamp  string
+	SummaryField    string `json:"summary"`
+	IdentifierField string `json:"identifier"`
+	DetailsField    string `json:"details"`
+	TimestampField  string `json:"timestamp"`
 }
 
-func (d *DumpObject) Summary() string    { return d.summary }
-func (d *DumpObject) Identifier() string { return d.identifier }
-func (d *DumpObject) Details() string    { return d.details }
-func (d *DumpObject) Timestamp() string  { return d.timestamp }
-func (d *DumpObject) _critical()         {}
+func (d DumpObject) Summary() string    { return "Restored: " + d.SummaryField }
+func (d DumpObject) Identifier() string { return d.IdentifierField }
+func (d DumpObject) Details() string    { return d.DetailsField }
+func (d DumpObject) Timestamp() string  { return d.TimestampField }
+func (d DumpObject) Critical()          {}
 
 func dump(path string) error {
 	dumps := []DumpObject{}
@@ -37,10 +37,10 @@ func dump(path string) error {
 		dumps = append(
 			dumps,
 			DumpObject{
-				summary:    critical.Summary(),
-				identifier: critical.Identifier(),
-				details:    critical.Details(),
-				timestamp:  critical.Timestamp(),
+				SummaryField:    critical.Summary(),
+				IdentifierField: critical.Identifier(),
+				DetailsField:    critical.Details(),
+				TimestampField:  critical.Timestamp(),
 			})
 	}
 	data, err := json.MarshalIndent(dumps, "", "  ")
