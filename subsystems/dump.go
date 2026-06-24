@@ -15,22 +15,18 @@ import (
 )
 
 type Dump struct{}
-
 type DumpObject struct {
-	Type string          `json:"type"`
-	Data json.RawMessage `json:"data"`
+	summary    string
+	identifier string
+	details    string
+	timestamp  string
 }
 
-func dumpObject(typeName string, obj any) (*DumpObject, error) {
-	data, err := json.MarshalIndent(obj, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	return &DumpObject{
-		Type: typeName,
-		Data: data,
-	}, nil
-}
+func (d *DumpObject) Summary() string    { return d.summary }
+func (d *DumpObject) Identifier() string { return d.identifier }
+func (d *DumpObject) Details() string    { return d.details }
+func (d *DumpObject) Timestamp() string  { return d.timestamp }
+func (d *DumpObject) _critical()         {}
 
 func dump(path string) error {
 	dumps := []DumpObject{}
@@ -38,12 +34,14 @@ func dump(path string) error {
 		if _, ok := critical.(bus.NodeTimeout); !ok {
 			continue
 		}
-		dump, err := dumpObject("NodeTimeout", critical)
-		if err != nil {
-			slog.Error("dump() failed", "error", err, "critical message", critical)
-			continue
-		}
-		dumps = append(dumps, *dump)
+		dumps = append(
+			dumps,
+			DumpObject{
+				summary:    critical.Summary(),
+				identifier: critical.Identifier(),
+				details:    critical.Details(),
+				timestamp:  critical.Timestamp(),
+			})
 	}
 	data, err := json.MarshalIndent(dumps, "", "  ")
 	if err != nil {
@@ -60,16 +58,7 @@ func restoreData(data []byte) error {
 	}
 
 	for _, dump := range dumps {
-		switch dump.Type {
-		case "NodeTimeout":
-			obj := bus.NodeTimeout{}
-			if err := json.Unmarshal(dump.Data, &obj); err != nil {
-				return err
-			}
-			bus.Publish(obj)
-		default:
-			slog.Error("restoreData: type not implemented", "type", dump.Type)
-		}
+		bus.Publish(dump)
 	}
 
 	return nil
