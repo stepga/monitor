@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	"path/filepath"
 	"strings"
@@ -22,7 +23,10 @@ type DumpObject struct {
 	TimestampField  string `json:"timestamp"`
 }
 
-func (d DumpObject) Summary() string    { return "Restored: " + d.SummaryField }
+func (d DumpObject) Summary() string {
+	now := time.Now().Format(time.DateTime)
+	return fmt.Sprintf("%s (Restored: %s)", d.SummaryField, now)
+}
 func (d DumpObject) Identifier() string { return d.IdentifierField }
 func (d DumpObject) Details() string    { return d.DetailsField }
 func (d DumpObject) Timestamp() string  { return d.TimestampField }
