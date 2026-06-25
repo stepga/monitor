@@ -35,11 +35,20 @@ function setNotificationsCritical() {
 				console.error("received invalid data: " + data);
 				return
 			}
-			criticalDiv.innerHTML = "";
-			for (var i = 0; i < data.length ; i++) {
-				var notification = createNotification(data[i]);
-				criticalDiv.prepend(notification);
-			}
+			// remove vanished critical notifications
+			criticalDiv.querySelectorAll('details').forEach(detail => {
+				const existingDetail = data.some(obj => obj.identifier === detail.id);
+				if (!existingDetail) {
+					detail.remove();
+				}
+			});
+			// add new critical notifications
+			data.forEach(obj => {
+				if (!document.getElementById(obj.identifier)) {
+					const notification = createNotification(obj, true);
+					criticalDiv.prepend(notification);
+				}
+			});
 		})
 		.catch(error => {
 			console.error("failed to fetch '/critical': "+ error);
@@ -64,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	eventSource.onmessage = (event) => {
 		try {
 			const data = JSON.parse(event.data);
-			const notification = createNotification(data);
+			const notification = createNotification(data, false);
 			verboseDiv.prepend(notification);
 			setNotificationsCritical()
 		} catch (error) {
@@ -75,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	setNotificationsCritical();
 });
 
-function createNotification(data) {
+function createNotification(data, doSetId) {
 	const timestamp_span = document.createElement("span");
 	timestamp_span.textContent = data['timestamp'];
 	timestamp_span.classList.add("timestamp");
@@ -98,6 +107,10 @@ function createNotification(data) {
 	const detail = document.createElement("details");
 	detail.appendChild(summary);
 	detail.appendChild(detail_div);
+
+	if (doSetId) {
+		detail.id = data['identifier'];
+	}
 
 	return detail;
 }
