@@ -1,33 +1,6 @@
 body {
-	max-width: 80vw;
+	max-width: 90vw;
 	margin: 0 auto;
-}
-
-details {
-	margin-top: 1rem;
-	border: 1px solid grey;
-	border-radius: 8px;
-	padding: 1rem 1rem;
-	background: white;
-	word-wrap: break-word
-}
-
-details summary span.timestamp {
-	margin: 0.5rem;
-	padding-right: 0.5rem;
-	border-right: 2px solid #ccc;
-}
-
-#critical details {
-	box-shadow: 2px 2px 2px red;
-}
-
-div.details {
-	margin-top: 1rem;
-}
-
-pre {
-	white-space: pre-wrap;
 }
 
 .container {
@@ -39,4 +12,111 @@ pre {
 .right {
 	flex: 1;
 	padding: 20px;
+}
+
+details {
+	margin-top: 1rem;
+	border: 1px solid grey;
+	border-radius: 8px;
+	background: white;
+	word-wrap: break-word;
+	overflow: hidden; /* important for clean full-height timestamp */
+}
+
+details summary {
+	display: flex;
+	padding: 0;
+	cursor: pointer;
+	align-items: stretch; /* makes children full height */
+}
+
+/* remove default marker spacing inconsistencies */
+details summary::-webkit-details-marker {
+	display: none;
+}
+
+details summary span.timestamp {
+	width: 10rem;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.75rem;
+	border-right: 2px solid #ccc;
+	background: #f5f5f5;
+}
+
+details summary span.timestamp::after {
+	content: "▸";
+	margin-left: 0.5rem;
+	transition: transform 0.15s ease;
+}
+
+details[open] summary span.timestamp::after {
+	transform: rotate(90deg);
+}
+
+details summary span.summary {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	padding: 0.75rem;
+}
+
+.delete-btn {
+	margin-left: auto;
+	background: #f5f5f5;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	color: #a00;
+	cursor: pointer;
+	padding: 1rem;
+	text-align: center;
+}
+
+.delete-btn:hover {
+	background: #ffe5e5;
+	border-color: #ffb3b3;
+	color: #b00000;
+}
+
+div.details {
+	margin-top: 0;
+	padding: 1rem;
+}
+
+pre {
+	white-space: pre-wrap;
+}
+
+#critical details {
+	box-shadow: 2px 2px 2px red;
+}
+
+.modal {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,0.4);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.modal.hidden {
+	display: none;
+}
+
+.modal-content {
+	background: white;
+	padding: 1rem;
+	border-radius: 8px;
+	min-width: 30vw;
+	box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+}
+
+.modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1rem;
+	margin-top: 1rem;
 }

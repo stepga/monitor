@@ -1,18 +1,20 @@
+let pendingDeleteElement = null;
+
 function getStorage(key) {
 	switch(key) {
 		case "verbose":
-			return sessionStorage.getItem(key) === 'true';
+			return sessionStorage.getItem(key) === "true";
 		default:
-			console.error("unknown variable name: " + key)
+			console.error("unknown variable name: " + key);
 	}
 }
 
 function setStorage(key, val) {
 	switch(key) {
 		case "verbose":
-			return sessionStorage.setItem('verbose', val === true)
+			return sessionStorage.setItem("verbose", val === true);
 		default:
-			console.error("unknown variable name: " + key)
+			console.error("unknown variable name: " + key);
 	}
 }
 
@@ -28,21 +30,22 @@ function verboseCheckboxOnChange(event) {
 
 function setNotificationsCritical() {
 	const criticalDiv = document.getElementById("critical");
+
 	fetch("/critical")
 		.then(response => response.json())
 		.then(data => {
-			if (data == null || !("length" in data)) {
-				console.error("received invalid data: " + data);
-				return
+			if (!Array.isArray(data)) {
+				console.error("invalid data:", data);
+				return;
 			}
-			// remove vanished critical notifications
-			criticalDiv.querySelectorAll('details').forEach(detail => {
-				const existingDetail = data.some(obj => obj.identifier === detail.id);
-				if (!existingDetail) {
-					detail.remove();
-				}
+
+			// remove vanished
+			criticalDiv.querySelectorAll("details").forEach(detail => {
+				const exists = data.some(obj => obj.identifier === detail.id);
+				if (!exists) detail.remove();
 			});
-			// add new critical notifications
+
+			// add new
 			data.forEach(obj => {
 				if (!document.getElementById(obj.identifier)) {
 					const notification = createNotification(obj, true);
@@ -50,14 +53,98 @@ function setNotificationsCritical() {
 				}
 			});
 		})
-		.catch(error => {
-			console.error("failed to fetch '/critical': "+ error);
-		});
+		.catch(err => console.error("fetch /critical failed:", err));
 }
 
-document.addEventListener("DOMContentLoaded", function(){
+function openConfirmModal(targetElement) {
+	pendingDeleteElement = targetElement;
+	const modalNotificationName = document.getElementById("modalNotificationName");
+	modalNotificationName.textContent = targetElement.id;
+	const modal = document.getElementById("confirmModal");
+	modal.classList.remove("hidden");
+}
+
+function closeConfirmModal() {
+	pendingDeleteElement = null;
+	const modalNotificationName = document.getElementById("modalNotificationName");
+	modalNotificationName.textContent = "";
+	const modal = document.getElementById("confirmModal");
+	modal.classList.add("hidden");
+}
+
+function setupModal() {
+	const modal = document.getElementById("confirmModal");
+	const btnYes = document.getElementById("confirmYes");
+	const btnNo = document.getElementById("confirmNo");
+
+	btnYes.addEventListener("click", () => {
+		if (pendingDeleteElement) {
+			pendingDeleteElement.remove();
+
+			// TODO: backend sync:
+			// fetch(`/critical/${pendingDeleteElement.id}`, { method: "DELETE" });
+		}
+		closeConfirmModal();
+	});
+
+	btnNo.addEventListener("click", closeConfirmModal);
+
+	// close modal when clicking outside
+	modal.addEventListener("click", (e) => {
+		if (e.target === modal) { closeConfirmModal(); }
+	});
+}
+
+function createNotification(data, isCritical) {
+	const timestamp = document.createElement("span");
+	timestamp.classList.add("timestamp");
+	timestamp.textContent = data.timestamp;
+
+	const summaryText = document.createElement("span");
+	summaryText.classList.add("summary");
+	summaryText.textContent = data.summary;
+
+	const summary = document.createElement("summary");
+	summary.appendChild(timestamp);
+	summary.appendChild(summaryText);
+
+	// add delete button for critical notifications
+	if (isCritical) {
+		const btn = document.createElement("button");
+		btn.textContent = "✕";
+		btn.classList.add("delete-btn");
+		btn.addEventListener("click", (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+
+			const detail = summary.parentElement;
+			openConfirmModal(detail);
+		});
+		summary.appendChild(btn);
+	}
+
+	const pre = document.createElement("pre");
+	pre.textContent = data.details;
+
+	const detailsDiv = document.createElement("div");
+	detailsDiv.classList.add("details");
+	detailsDiv.appendChild(pre);
+
+	const detail = document.createElement("details");
+	detail.appendChild(summary);
+	detail.appendChild(detailsDiv);
+
+	if (isCritical) {
+		detail.id = data.identifier;
+	}
+
+	return detail;
+}
+
+document.addEventListener("DOMContentLoaded", function() {
 	const eventSource = new EventSource("/notifications");
-	window.addEventListener('beforeunload', () => {
+
+	window.addEventListener("beforeunload", () => {
 		// prevent js error on page reload
 		// see: https://bugzilla.mozilla.org/show_bug.cgi?id=833462
 		eventSource.close();
@@ -75,42 +162,12 @@ document.addEventListener("DOMContentLoaded", function(){
 			const data = JSON.parse(event.data);
 			const notification = createNotification(data, false);
 			verboseDiv.prepend(notification);
-			setNotificationsCritical()
-		} catch (error) {
-			console.error('failed to handle message: ', error.message);
+			setNotificationsCritical();
+		} catch (err) {
+			console.error("message error:", err);
 		}
 	};
 
+	setupModal();
 	setNotificationsCritical();
 });
-
-function createNotification(data, doSetId) {
-	const timestamp_span = document.createElement("span");
-	timestamp_span.textContent = data['timestamp'];
-	timestamp_span.classList.add("timestamp");
-
-	const summary_span = document.createElement("span");
-	summary_span.textContent = data['summary'];
-	summary_span.classList.add("summary");
-
-	const summary = document.createElement("summary");
-	summary.appendChild(timestamp_span);
-	summary.appendChild(summary_span);
-
-	const detail_pre = document.createElement("pre");
-	detail_pre.textContent = data['details'];
-
-	const detail_div = document.createElement("div");
-	detail_div.classList.add("details");
-	detail_div.appendChild(detail_pre);
-
-	const detail = document.createElement("details");
-	detail.appendChild(summary);
-	detail.appendChild(detail_div);
-
-	if (doSetId) {
-		detail.id = data['identifier'];
-	}
-
-	return detail;
-}
