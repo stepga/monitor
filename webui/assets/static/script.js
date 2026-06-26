@@ -79,10 +79,15 @@ function setupModal() {
 
 	btnYes.addEventListener("click", () => {
 		if (pendingDeleteElement) {
+			const notificationId = pendingDeleteElement.id;
 			pendingDeleteElement.remove();
-
-			// TODO: backend sync:
-			// fetch(`/critical/${pendingDeleteElement.id}`, { method: "DELETE" });
+			deleteRequestCritical(notificationId)
+				.then(() => {
+					console.log("backend deleted notification: " + notificationId);
+				})
+				.catch(err => {
+					console.error("backend deletion of '" + notificationId + "' failed: " + err);
+				});
 		}
 		closeConfirmModal();
 	});
@@ -93,6 +98,16 @@ function setupModal() {
 	modal.addEventListener("click", (e) => {
 		if (e.target === modal) { closeConfirmModal(); }
 	});
+}
+
+async function deleteRequestCritical(identifier) {
+	const response = await fetch(
+		`/delete?id=${encodeURIComponent(identifier)}`,
+		{ method: "DELETE", }
+	);
+	if (!response.ok) {
+		throw new Error(`Request failed: ${response.status}`);
+	}
 }
 
 function createNotification(data, isCritical) {

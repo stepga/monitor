@@ -113,6 +113,16 @@ func (s *Server) criticalHandler(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+func (s *Server) deleteHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "missing id parameter", http.StatusBadRequest)
+		return
+	}
+	bus.Publish(bus.InfoDelete{Id: id})
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func infoToWebUiInfo(info bus.Info) WebUiInfo {
 	return WebUiInfo{
 		Identifier: info.Identifier(),
@@ -127,14 +137,16 @@ type Server struct{}
 func (s *Server) Init() error {
 	address := config.Cfg.WebUiAddress
 
-	http.HandleFunc("/notifications", s.notificationHandler)
-	http.HandleFunc("/static/", assetsFileHandler)
-	http.HandleFunc("/critical", s.criticalHandler)
-	http.HandleFunc("/", rootHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/notifications", s.notificationHandler)
+	mux.HandleFunc("/static/", assetsFileHandler)
+	mux.HandleFunc("/critical", s.criticalHandler)
+	mux.HandleFunc("/", rootHandler)
+	mux.HandleFunc("DELETE /delete", s.deleteHandler)
 
 	go func() {
 		slog.Info("webui listens on", "address", address)
-		err := http.ListenAndServe(address, nil)
+		err := http.ListenAndServe(address, mux)
 		slog.Error("ListenAndServe failed", "address", address, "error", err)
 	}()
 

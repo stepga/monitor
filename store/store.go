@@ -15,6 +15,17 @@ var store = &Store{
 	critical: make(map[string]bus.Critical),
 }
 
+func (s *Store) delete(identifier string) bool {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	_, exists := store.critical[identifier]
+	if exists {
+		delete(s.critical, identifier)
+		return true
+	}
+	return false
+}
+
 func Start() {
 	go func() {
 		ch := bus.Subscribe()
@@ -31,14 +42,10 @@ func Start() {
 				} else {
 				}
 				store.lock.Unlock()
+			case bus.InfoDelete:
+				changed = store.delete(msg.Identifier())
 			case bus.Info:
-				store.lock.Lock()
-				_, exists := store.critical[msg.Identifier()]
-				if exists {
-					delete(store.critical, msg.Identifier())
-					changed = true
-				}
-				store.lock.Unlock()
+				changed = store.delete(msg.Identifier())
 			}
 			if changed {
 				bus.Publish(bus.CriticalListChanged{})

@@ -21,6 +21,8 @@ func (_ *Diskmon) Init() error {
 		disksReported := make(map[string]struct{})
 		for m := range ch {
 			switch msg := m.(type) {
+			case bus.InfoDelete:
+				delete(disksReported, msg.Identifier())
 			case bus.NodeInfo:
 				for _, fs := range msg.FileSystems {
 					if fs.Source == "none" {
