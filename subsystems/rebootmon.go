@@ -21,8 +21,6 @@ func (_ *Rebootmon) Init() error {
 		rebootsReported := make(map[string]struct{})
 		for m := range ch {
 			switch msg := m.(type) {
-			case bus.InfoDelete:
-				delete(rebootsReported, msg.Identifier())
 			case bus.NodeInfo:
 				_, exists := rebootsReported[msg.Hostname]
 				if msg.RebootRequired && !exists {

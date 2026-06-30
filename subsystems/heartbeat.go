@@ -55,8 +55,6 @@ func (h *Heartbeat) Init() error {
 				h.tick()
 			case m := <-ch:
 				switch msg := m.(type) {
-				case bus.InfoDelete:
-					delete(h.reports, msg.Identifier())
 				case bus.ConfigReloaded:
 					ticker.Stop()
 					interval = config.Cfg.Heartbeat.CheckIntervalInMinutes * time.Minute
