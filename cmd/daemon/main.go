@@ -12,7 +12,6 @@ import (
 	"github.com/stepga/monitor/config"
 	"github.com/stepga/monitor/store"
 	"github.com/stepga/monitor/subsystems"
-	"github.com/stepga/monitor/webui"
 )
 
 var AvailableSubsystems = map[string]subsystems.Subsystem{
@@ -20,7 +19,7 @@ var AvailableSubsystems = map[string]subsystems.Subsystem{
 	"listener":  &subsystems.Listener{},
 	"stdout":    &subsystems.Stdout{},
 	"pushover":  &subsystems.Pushover{},
-	"webui":     &webui.Server{},
+	"webui":     &subsystems.WebUi{},
 	"heartbeat": &subsystems.Heartbeat{},
 	"diskmon":   &subsystems.Diskmon{},
 	"rebootmon": &subsystems.Rebootmon{},

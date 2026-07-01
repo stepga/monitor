@@ -1,4 +1,4 @@
-package webui
+package subsystems
 
 import (
 	"embed"
@@ -20,11 +20,11 @@ type WebUiInfo struct {
 	Timestamp  string `json:"timestamp"`
 }
 
-//go:embed assets/*
+//go:embed webui_assets/*
 var assetsFS embed.FS
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	indexPath := "assets/index.html"
+	indexPath := "webui_assets/index.html"
 	indexData, err := assetsFS.ReadFile(indexPath)
 	if err != nil {
 		slog.Error("ReadFile() failed", "error", err, "indexPath", indexPath)
@@ -94,7 +94,7 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 	case "/static/style.css":
 		fallthrough
 	case "/static/script.js":
-		http.ServeFileFS(w, r, assetsFS, "assets"+path)
+		http.ServeFileFS(w, r, assetsFS, "webui_assets"+path)
 	default:
 		slog.Error("assetsFileHandler: requested asset url not whitelisted", "url", path)
 		w.WriteHeader(http.StatusNotFound)
@@ -132,9 +132,9 @@ func infoToWebUiInfo(info bus.Info) WebUiInfo {
 	}
 }
 
-type Server struct{}
+type WebUi struct{}
 
-func (s *Server) Init() error {
+func (s *WebUi) Init() error {
 	address := config.Cfg.WebUi.Address
 
 	mux := http.NewServeMux()

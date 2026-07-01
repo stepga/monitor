@@ -7,7 +7,7 @@ node_openbsd: bin/node_openbsd
 node_pi: bin/node_pi
 
 GO_SOURCES := $(shell find . -name '*.go')
-WEBUI_SOURCES := webui/assets/index.html $(wildcard webui/assets/static/*)
+WEBUI_SOURCES := subsystems/webui_assets/index.html $(wildcard subsystems/webui_assets/static/*)
 
 bin/daemon: cmd/daemon/main.go $(GO_SOURCES) $(WEBUI_SOURCES)
 	go build -o $@ $<
