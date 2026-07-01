@@ -40,7 +40,7 @@ func sseSendData(w http.ResponseWriter, data any) {
 	}
 }
 
-func (s *Server) notificationHandler(w http.ResponseWriter, r *http.Request) {
+func notificationHandler(w http.ResponseWriter, r *http.Request) {
 	// http headers required for SSE
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -101,7 +101,7 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) criticalHandler(w http.ResponseWriter, _ *http.Request) {
+func criticalHandler(w http.ResponseWriter, _ *http.Request) {
 	var infos []WebUiInfo
 	w.Header().Set("Content-Type", "application/json")
 	for _, critical := range store.FetchCritical() {
@@ -113,7 +113,7 @@ func (s *Server) criticalHandler(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (s *Server) deleteHandler(w http.ResponseWriter, r *http.Request) {
+func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	if id == "" {
 		http.Error(w, "missing id parameter", http.StatusBadRequest)
@@ -138,11 +138,11 @@ func (s *Server) Init() error {
 	address := config.Cfg.WebUi.Address
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/notifications", s.notificationHandler)
+	mux.HandleFunc("/notifications", notificationHandler)
 	mux.HandleFunc("/static/", assetsFileHandler)
-	mux.HandleFunc("/critical", s.criticalHandler)
+	mux.HandleFunc("/critical", criticalHandler)
 	mux.HandleFunc("/", rootHandler)
-	mux.HandleFunc("DELETE /delete", s.deleteHandler)
+	mux.HandleFunc("DELETE /delete", deleteHandler)
 
 	go func() {
 		slog.Info("webui listens on", "address", address)
