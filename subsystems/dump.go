@@ -81,7 +81,7 @@ func restore(path string) error {
 }
 
 func (r *Dump) Init() error {
-	path, err := pathCheck(config.Cfg.DumpPath)
+	path, err := pathCheck(config.Cfg.Dump.Path)
 	if err != nil {
 		return fmt.Errorf("Dump: path error: %v", err)
 	}

@@ -1,12 +1,9 @@
 {
-    "webui_address": "0.0.0.0:8899",
-    "dump_path": "~/.config/monitor_dump.json",
     "subsystems": ["dump", "listener", "cert", "stdout", "webui", "heartbeat", "diskmon", "rebootmon"],
     "listener": {
         "address": "127.0.0.1:5566",
         "max_msg_size_mb": 5
     },
-    "disk_threshold": 0.8,
     "cert": {
         "minimum_days_left": 5,
         "check_interval_in_hours": 24,
@@ -21,6 +18,9 @@
             "https://youtube.com"
         ]
     },
+    "diskmon": {
+        "threshold": 0.8
+    },
     "heartbeat": {
         "node_timeout_in_minutes": 90,
         "check_interval_in_minutes": 30
@@ -28,5 +28,11 @@
     "redmine": {
         "url": "https://redmine.your.domain",
         "issue_id": "1234"
+    },
+    "webui": {
+        "address": "0.0.0.0:8899"
+    },
+    "dump": {
+        "path": "~/.config/monitor_dump.json"
     }
 }

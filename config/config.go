@@ -59,13 +59,25 @@ type RedmineConfig struct {
 	IssueId string `json:"issue_id"`
 }
 
+type DiskmonConfig struct {
+	Threshold float64 `json:"threshold"`
+}
+
+type WebUiConfig struct {
+	Address string `json:"address"`
+}
+
+type DumpConfig struct {
+	Path string `json:"path"`
+}
+
 type Config struct {
-	Subsystems    []string        `json:"subsystems"`
-	DiskThreshold float64         `json:"disk_threshold"`
-	Cert          CertConfig      `json:"cert"`
-	Listener      ListenerConfig  `json:"listener"`
-	WebUiAddress  string          `json:"webui_address"`
-	Heartbeat     HeartbeatConfig `json:"heartbeat"`
-	Redmine       RedmineConfig   `json:"redmine"`
-	DumpPath      string          `json:"dump_path"`
+	Subsystems []string        `json:"subsystems"`
+	Cert       CertConfig      `json:"cert"`
+	Diskmon    DiskmonConfig   `json:"diskmon"`
+	Listener   ListenerConfig  `json:"listener"`
+	WebUi      WebUiConfig     `json:"webui"`
+	Heartbeat  HeartbeatConfig `json:"heartbeat"`
+	Redmine    RedmineConfig   `json:"redmine"`
+	Dump       DumpConfig      `json:"dump"`
 }

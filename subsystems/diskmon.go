@@ -15,6 +15,8 @@ func (_ *Diskmon) Init() error {
 		return fmt.Errorf("diskmon requires listener subsystem to be configured")
 	}
 
+	threshold := config.Cfg.Diskmon.Threshold
+
 	go func() {
 		ch := bus.Subscribe()
 		defer bus.Unsubscribe(ch)
@@ -28,7 +30,7 @@ func (_ *Diskmon) Init() error {
 					}
 					key := msg.Hostname + ":" + fs.Source
 					_, exists := disksReported[key]
-					full := float64(fs.UsedBytes) > (float64(fs.AvailableBytes+fs.UsedBytes) * float64(config.Cfg.DiskThreshold))
+					full := float64(fs.UsedBytes) > (float64(fs.AvailableBytes+fs.UsedBytes) * threshold)
 					if full && !exists {
 						bus.Publish(bus.DiskGettingFull{
 							Hostname: msg.Hostname,

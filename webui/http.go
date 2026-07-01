@@ -135,7 +135,7 @@ func infoToWebUiInfo(info bus.Info) WebUiInfo {
 type Server struct{}
 
 func (s *Server) Init() error {
-	address := config.Cfg.WebUiAddress
+	address := config.Cfg.WebUi.Address
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/notifications", s.notificationHandler)
