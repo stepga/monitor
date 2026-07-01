@@ -24,5 +24,9 @@
     "heartbeat": {
         "node_timeout_in_minutes": 90,
         "check_interval_in_minutes": 30
+    },
+    "redmine": {
+        "url": "https://redmine.your.domain",
+        "issue_id": "1234"
     }
 }
