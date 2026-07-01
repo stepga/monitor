@@ -119,7 +119,7 @@ func (s *Server) deleteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing id parameter", http.StatusBadRequest)
 		return
 	}
-	bus.Publish(bus.InfoDelete{Id: id})
+	bus.Publish(bus.StoreInfoDelete{Id: id})
 	w.WriteHeader(http.StatusNoContent)
 }
 

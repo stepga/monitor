@@ -42,7 +42,7 @@ func Start() {
 				} else {
 				}
 				store.lock.Unlock()
-			case bus.InfoDelete:
+			case bus.StoreInfoDelete:
 				changed = store.delete(msg.Identifier())
 			case bus.Info:
 				changed = store.delete(msg.Identifier())

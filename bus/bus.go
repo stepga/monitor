@@ -111,9 +111,8 @@ type Rebooted struct {
 type CriticalListChanged struct{}
 
 // Reported as a fake success notification e.g. due to manually delete critical
-// notifications via web interface. Example: Fake a NodeInfo for an exsisting
-// NodeTimeout, to make the NodeTimeout in hearbeat.go and store.go disappear.
-type InfoDelete struct {
+// notifications via web interface.
+type StoreInfoDelete struct {
 	Id   string
 	Time time.Time
 }
@@ -182,7 +181,7 @@ func (n Rebooted) Summary() string {
 	return fmt.Sprintf("Node %s was rebooted", n.Hostname)
 }
 
-func (i InfoDelete) Summary() string {
+func (i StoreInfoDelete) Summary() string {
 	return fmt.Sprintf("Enforce deletion of critical infos with Identifier: %s", i.Id)
 }
 
@@ -310,7 +309,7 @@ func (n Rebooted) Details() string {
 	)
 }
 
-func (i InfoDelete) Details() string { return "" }
+func (i StoreInfoDelete) Details() string { return "" }
 
 func getTimestamp(t *time.Time) string {
 	ret := time.Now()
@@ -330,7 +329,7 @@ func (n NodeInfo) Timestamp() string        { return getTimestamp(&n.Time) }
 func (n NodeTimeout) Timestamp() string     { return getTimestamp(&n.Time) }
 func (r RebootRequired) Timestamp() string  { return getTimestamp(&r.Time) }
 func (r Rebooted) Timestamp() string        { return getTimestamp(&r.Time) }
-func (i InfoDelete) Timestamp() string      { return getTimestamp(&i.Time) }
+func (i StoreInfoDelete) Timestamp() string { return getTimestamp(&i.Time) }
 
 func (c CertError) Identifier() string       { return "Cert:" + c.Url }
 func (c CertExpiresSoon) Identifier() string { return "Cert:" + c.Url }
@@ -342,7 +341,7 @@ func (n NodeInfo) Identifier() string        { return "Node:" + n.Hostname }
 func (n NodeTimeout) Identifier() string     { return "Node:" + n.Hostname }
 func (n RebootRequired) Identifier() string  { return "Reboot:" + n.Hostname }
 func (n Rebooted) Identifier() string        { return "Reboot:" + n.Hostname }
-func (i InfoDelete) Identifier() string      { return i.Id }
+func (i StoreInfoDelete) Identifier() string { return i.Id }
 
 func (DiskGettingFull) Critical() {}
 func (CertError) Critical()       {}
