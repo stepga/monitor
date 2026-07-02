@@ -30,6 +30,15 @@ details summary {
 	align-items: stretch; /* makes children full height */
 }
 
+details[open] summary {
+	border-bottom: 1px solid #ccc;
+}
+
+/* Border between summary elements */
+details summary > *:not(:last-child) {
+	border-right: 1px solid #ccc;
+}
+
 /* remove default marker spacing inconsistencies */
 details summary::-webkit-details-marker {
 	display: none;
@@ -42,7 +51,6 @@ details summary span.timestamp {
 	align-items: center;
 	justify-content: space-between;
 	padding: 0.75rem;
-	border-right: 2px solid #ccc;
 	background: #f5f5f5;
 }
 
@@ -66,8 +74,7 @@ details summary span.summary {
 .delete-btn {
 	margin-left: auto;
 	background: #f5f5f5;
-	border: 1px solid #ccc;
-	border-radius: 6px;
+	border: none;
 	color: #a00;
 	cursor: pointer;
 	padding: 1rem;
