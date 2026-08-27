@@ -137,6 +137,8 @@ func (r *Redmine) Init() error {
 	go func() {
 		ch := bus.Subscribe()
 		defer bus.Unsubscribe(ch)
+		// Ensure Issue is in sync
+		go r.updateIssue(config.Cfg.Redmine.Url, config.Cfg.Redmine.IssueId)
 		for m := range ch {
 			switch m.(type) {
 			case bus.CriticalListChanged:
