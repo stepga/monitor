@@ -44,7 +44,7 @@ func (p *Pushover) Init() error {
 		return fmt.Errorf("PUSOVER_TOKEN is required")
 	}
 	p.user = os.Getenv("PUSHOVER_USER")
-	if p.token == "" {
+	if p.user == "" {
 		return fmt.Errorf("PUSOVER_USER is required")
 	}
 	go func() {
